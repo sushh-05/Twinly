@@ -1,0 +1,80 @@
+[
+    {
+        "id": "dress_001",
+        "name": "Black Wrap Dress",
+        "category": "dress",
+        "colors": [
+            "black"
+        ],
+        "occasion": [
+            "dinner",
+            "office",
+            "formal"
+        ],
+        "price": 49.99,
+        "currency": "USD",
+        "sizes": [
+            "XS",
+            "S",
+            "M",
+            "L",
+            "XL"
+        ],
+        "sizeChart": {
+            "S": {
+                "bustCm": 86,
+                "waistCm": 70,
+                "hipCm": 94
+            },
+            "M": {
+                "bustCm": 92,
+                "waistCm": 76,
+                "hipCm": 100
+            },
+            "L": {
+                "bustCm": 98,
+                "waistCm": 82,
+                "hipCm": 106
+            }
+        },
+        "stretch": "medium",
+        "merchant": "Demo Store",
+        "purchaseUrl": "https://example.com/product/dress_001"
+    },
+    {
+        "id": "shirt_001",
+        "name": "White Cotton Shirt",
+        "category": "shirt",
+        "colors": [
+            "white"
+        ],
+        "occasion": [
+            "office",
+            "casual"
+        ],
+        "price": 29.99,
+        "currency": "USD",
+        "sizes": [
+            "S",
+            "M",
+            "L"
+        ],
+        "sizeChart": {
+            "S": {
+                "chestCm": 90,
+                "waistCm": 74
+            },
+            "M": {
+                "chestCm": 96,
+                "waistCm": 80
+            },
+            "L": {
+                "chestCm": 102,
+                "waistCm": 86
+            }
+        },
+        "stretch": "low",
+        "merchant": "Demo Store",
+        "purchaseUrl": "https://example.com/product/shirt_001"
+    }
+]

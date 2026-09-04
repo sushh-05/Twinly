@@ -1,0 +1,18 @@
+[
+    {
+        "id": "hair_001",
+        "name": "Low Bun",
+        "occasion": [
+            "formal",
+            "dinner"
+        ]
+    },
+    {
+        "id": "hair_002",
+        "name": "Loose Waves",
+        "occasion": [
+            "casual",
+            "party"
+        ]
+    }
+]

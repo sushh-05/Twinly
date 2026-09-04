@@ -1,0 +1,22 @@
+[
+    {
+        "id": "acc_001",
+        "name": "Silver Drop Earrings",
+        "category": "earrings",
+        "occasion": [
+            "dinner",
+            "formal"
+        ],
+        "price": 12.99
+    },
+    {
+        "id": "acc_002",
+        "name": "Canvas Tote Bag",
+        "category": "bag",
+        "occasion": [
+            "casual",
+            "office"
+        ],
+        "price": 18.00
+    }
+]

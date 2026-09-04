@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "500892366854",
+    "project_id": "twinly-cf976",
+    "storage_bucket": "twinly-cf976.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:500892366854:android:28b189bf97f93b50e76b87",
+        "android_client_info": {
+          "package_name": "com.teamsapphire.twinlyapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDxbr52jT2dQQDXQWMDX2XUvOsAzhM8hAw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
