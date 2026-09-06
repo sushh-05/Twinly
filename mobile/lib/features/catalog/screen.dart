@@ -96,7 +96,7 @@ class _GarmentCard extends StatelessWidget {
               child: Container(
                 width: double.infinity,
                 decoration: BoxDecoration(
-                  color: garment.placeholderColor.withOpacity(0.8),
+                  color: garment.placeholderColor.withValues(alpha: 0.8),
                   borderRadius: BorderRadius.circular(8),
                 ),
               ),

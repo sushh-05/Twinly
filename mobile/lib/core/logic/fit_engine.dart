@@ -16,10 +16,12 @@ class RegionFit {
 List<RegionFit> computeFit(AvatarMeasurements m, Garment g) {
   RegionFit evaluate(String region, double userVal, double chartVal) {
     final delta = userVal - chartVal;
-    if (delta > 3)
+    if (delta > 3) {
       return RegionFit(region, FitVerdict.tight, 'Snug at $region');
-    if (delta < -3)
+    }
+    if (delta < -3) {
       return RegionFit(region, FitVerdict.loose, 'Loose at $region');
+    }
     return RegionFit(region, FitVerdict.good, 'Good fit at $region');
   }
 

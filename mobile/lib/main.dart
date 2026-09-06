@@ -1,5 +1,6 @@
 import 'dart:io' show Platform;
 
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -10,11 +11,11 @@ import 'firebase_options.dart';
 import 'core/router.dart';
 import 'core/providers/user_profile_state.dart';
 
-// TODO: replace with your actual RevenueCat public API keys
-// (Project settings > API keys in the RevenueCat dashboard — use the
-// platform-specific PUBLIC key, never the secret key, in client code)
-const _revenueCatAndroidKey = 'goog_XXXXXXXXXXXXXXXXXXXXXXXXXXX';
-const _revenueCatIosKey = 'appl_XXXXXXXXXXXXXXXXXXXXXXXXXXX';
+// Supply these only for a build that should use real purchases:
+//   flutter run --dart-define=REVENUECAT_ANDROID_KEY=goog_...
+// Use RevenueCat's *public* SDK key here, never its secret API key.
+const _revenueCatAndroidKey = String.fromEnvironment('REVENUECAT_ANDROID_KEY');
+const _revenueCatIosKey = String.fromEnvironment('REVENUECAT_IOS_KEY');
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -39,7 +40,22 @@ void main() async {
 }
 
 Future<void> _configureRevenueCat() async {
+  // purchases_flutter uses native store SDKs. A browser is useful for UI
+  // development, but it cannot configure an Android or iOS purchase SDK.
+  if (kIsWeb) {
+    debugPrint('RevenueCat is unavailable on web; running in local demo mode.');
+    return;
+  }
+
   final apiKey = Platform.isAndroid ? _revenueCatAndroidKey : _revenueCatIosKey;
+
+  // A blank key is the normal local/demo configuration. The rest of the app
+  // still runs, while purchases remain intentionally unavailable until the
+  // team configures its RevenueCat project.
+  if (apiKey.isEmpty) {
+    debugPrint('RevenueCat not configured; running in local demo mode.');
+    return;
+  }
 
   await Purchases.setLogLevel(
     LogLevel.debug,

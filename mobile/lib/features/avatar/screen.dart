@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/providers/avatar_state.dart';
-import 'body_painter.dart';
+import 'avatar_3d_view.dart';
 
 class AvatarScreen extends ConsumerStatefulWidget {
   const AvatarScreen({super.key});
@@ -13,8 +13,7 @@ class AvatarScreen extends ConsumerStatefulWidget {
 }
 
 class _AvatarScreenState extends ConsumerState<AvatarScreen> {
-  // View-only UI state (front vs side render) — unrelated to gender,
-  // so it stays as local widget state rather than going in the provider.
+  // Front vs Side view orbit angle for the 3D model
   bool _isSideView = false;
 
   @override
@@ -24,19 +23,22 @@ class _AvatarScreenState extends ConsumerState<AvatarScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Your Avatar'),
+        title: const Text(
+          'Your Avatar',
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
         actions: [
-          // Gender toggle — resets measurements to that gender's defaults
+          // Gender toggle — switches between feminine & masculine GLBs
           IconButton(
             icon: Icon(measurements.isFeminine ? Icons.female : Icons.male),
             tooltip: measurements.isFeminine
-                ? 'Switch to male defaults'
-                : 'Switch to female defaults',
+                ? 'Switch to male profile'
+                : 'Switch to female profile',
             onPressed: () {
               notifier.setGender(!measurements.isFeminine);
             },
           ),
-          // Front/side view toggle — purely visual, does not affect measurements
+          // Front / Side view toggle — orbits 3D camera 90 degrees
           IconButton(
             icon: Icon(_isSideView ? Icons.person : Icons.person_outline),
             tooltip: _isSideView ? 'Front view' : 'Side view',
@@ -49,24 +51,20 @@ class _AvatarScreenState extends ConsumerState<AvatarScreen> {
       body: SafeArea(
         child: Column(
           children: [
-            // Avatar display area
+            // 3D Avatar Display Area
             Expanded(
               child: Container(
                 margin: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFF5F5F5),
-                  borderRadius: BorderRadius.circular(12),
+                  color: const Color(0xFFF5F5F7),
+                  borderRadius: BorderRadius.circular(16),
                   border: Border.all(color: Colors.grey.shade300),
                 ),
-                child: Center(
-                  child: CustomPaint(
-                    size: const Size(280, 500),
-                    painter: BodyPainter(
-                      height: measurements.height,
-                      chest: measurements.chest,
-                      waist: measurements.waist,
-                      hip: measurements.hip,
-                      inseam: measurements.inseam,
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(16),
+                  child: Center(
+                    child: Avatar3DView(
+                      height: double.infinity,
                       isSideView: _isSideView,
                     ),
                   ),
@@ -74,7 +72,7 @@ class _AvatarScreenState extends ConsumerState<AvatarScreen> {
               ),
             ),
 
-            // Sliders
+            // Sliders Control Panel
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               constraints: const BoxConstraints(maxHeight: 320),
@@ -137,10 +135,15 @@ class _AvatarScreenState extends ConsumerState<AvatarScreen> {
                   },
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 16),
+                    backgroundColor: Theme.of(context).primaryColor,
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
                   ),
                   child: const Text(
                     'Continue to Catalog',
-                    style: TextStyle(fontSize: 18),
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                 ),
               ),
@@ -167,11 +170,15 @@ class _AvatarScreenState extends ConsumerState<AvatarScreen> {
           children: [
             Text(
               label,
-              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
             ),
             Text(
               '${value.round()} $suffix',
-              style: const TextStyle(fontSize: 14, color: Colors.grey),
+              style: const TextStyle(
+                fontSize: 14,
+                color: Colors.black54,
+                fontWeight: FontWeight.w500,
+              ),
             ),
           ],
         ),

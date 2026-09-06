@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 
 import '../../core/data/garment_catalog.dart';
 import '../../core/logic/fit_engine.dart';
 import '../../core/providers/saved_avatars_state.dart';
 import '../avatar/body_painter.dart';
-import '../fitting/screen.dart'; // reuses the private-package _FitRow? see note below
+// reuses the private-package _FitRow? see note below
 
 class SavedLookDetailScreen extends StatelessWidget {
   const SavedLookDetailScreen({super.key, required this.entry});
