@@ -4,6 +4,7 @@ import '../../core/data/garment_catalog.dart';
 import '../../core/logic/fit_engine.dart';
 import '../../core/providers/saved_avatars_state.dart';
 import '../avatar/body_painter.dart';
+
 // reuses the private-package _FitRow? see note below
 
 class SavedLookDetailScreen extends StatelessWidget {

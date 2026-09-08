@@ -1,8 +1,8 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../core/data/garment_catalog.dart';
 import '../../core/providers/garment_state.dart';
 import '../../models/garment.dart';
 
@@ -13,31 +13,61 @@ class CatalogScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final selected = ref.watch(selectedGarmentProvider);
     final notifier = ref.read(selectedGarmentProvider.notifier);
+    final catalog = ref.watch(remoteGarmentsProvider);
 
     return Scaffold(
       appBar: AppBar(title: const Text('Catalog')),
       body: SafeArea(
         child: Column(
           children: [
-            Expanded(
-              child: GridView.builder(
-                padding: const EdgeInsets.all(16),
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  crossAxisSpacing: 16,
-                  mainAxisSpacing: 16,
-                  childAspectRatio: 0.75,
+            if (kDebugMode && catalog.hasValue)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: Chip(
+                    label: Text(
+                      catalog.requireValue.usingOfflineCatalog
+                          ? 'Offline catalog'
+                          : 'Backend connected',
+                    ),
+                  ),
                 ),
-                itemCount: garmentCatalog.length,
-                itemBuilder: (context, index) {
-                  final garment = garmentCatalog[index];
-                  final isSelected = selected?.id == garment.id;
-                  return _GarmentCard(
-                    garment: garment,
-                    isSelected: isSelected,
-                    onTap: () => notifier.select(garment),
-                  );
-                },
+              ),
+            Expanded(
+              child: catalog.when(
+                loading: () => const Center(child: CircularProgressIndicator()),
+                error: (_, _) => Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Text('Unable to load the catalog.'),
+                      TextButton(
+                        onPressed: () => ref.invalidate(remoteGarmentsProvider),
+                        child: const Text('Retry'),
+                      ),
+                    ],
+                  ),
+                ),
+                data: (catalogState) => GridView.builder(
+                  padding: const EdgeInsets.all(16),
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    crossAxisSpacing: 16,
+                    mainAxisSpacing: 16,
+                    childAspectRatio: 0.75,
+                  ),
+                  itemCount: catalogState.garments.length,
+                  itemBuilder: (context, index) {
+                    final garment = catalogState.garments[index];
+                    final isSelected = selected?.id == garment.id;
+                    return _GarmentCard(
+                      garment: garment,
+                      isSelected: isSelected,
+                      onTap: () => notifier.select(garment),
+                    );
+                  },
+                ),
               ),
             ),
             Padding(

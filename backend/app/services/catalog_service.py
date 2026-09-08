@@ -15,3 +15,11 @@ def get_garment_by_id(garment_id: str):
         if g["id"] == garment_id:
             return g
     return None
+
+
+def list_garments(category: str | None = None):
+    """Return catalog entries, optionally restricted to a category."""
+    garments = load_garments()
+    if category is None:
+        return garments
+    return [garment for garment in garments if garment.get("category") == category]

@@ -7,6 +7,7 @@ import '../../core/providers/avatar_state.dart';
 import '../../core/providers/garment_state.dart';
 import '../../core/providers/saved_avatars_state.dart';
 import '../../core/providers/usage_limits_state.dart';
+import '../../models/fit_report.dart';
 import '../avatar/body_painter.dart';
 
 class FittingScreen extends ConsumerStatefulWidget {
@@ -20,6 +21,9 @@ class _FittingScreenState extends ConsumerState<FittingScreen> {
   // Guards against re-registering a try on every rebuild — only the
   // first build for a given garment id should ever count it.
   String? _registeredForGarmentId;
+  String _preferredFit = 'regular';
+  String? _reportKey;
+  Future<FitReport>? _reportFuture;
 
   @override
   Widget build(BuildContext context) {
@@ -97,7 +101,20 @@ class _FittingScreenState extends ConsumerState<FittingScreen> {
       });
     }
 
-    final fitResults = computeFit(measurements, garment);
+    final reportKey =
+        '${garment.id}:${measurements.chest}:${measurements.waist}:${measurements.hip}:$_preferredFit';
+    if (_reportKey != reportKey) {
+      _reportKey = reportKey;
+      _reportFuture = ref
+          .read(twinlyApiServiceProvider)
+          .getFitReport(
+            garmentId: garment.id,
+            bustCm: measurements.chest,
+            waistCm: measurements.waist,
+            hipCm: measurements.hip,
+            preferredFit: _preferredFit,
+          );
+    }
 
     return Scaffold(
       appBar: AppBar(title: Text(garment.name)),
@@ -149,7 +166,94 @@ class _FittingScreenState extends ConsumerState<FittingScreen> {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Column(
-                children: fitResults.map((r) => _FitRow(r)).toList(),
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SegmentedButton<String>(
+                    segments: const [
+                      ButtonSegment(value: 'fitted', label: Text('Fitted')),
+                      ButtonSegment(value: 'regular', label: Text('Regular')),
+                      ButtonSegment(value: 'relaxed', label: Text('Relaxed')),
+                    ],
+                    selected: {_preferredFit},
+                    onSelectionChanged: (selection) => setState(() {
+                      _preferredFit = selection.first;
+                      _reportKey = null;
+                    }),
+                  ),
+                  const SizedBox(height: 8),
+                  FutureBuilder<FitReport>(
+                    future: _reportFuture,
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState != ConnectionState.done) {
+                        return const Center(
+                          child: Padding(
+                            padding: EdgeInsets.all(12),
+                            child: CircularProgressIndicator(),
+                          ),
+                        );
+                      }
+                      if (snapshot.hasError) {
+                        final offline = computeFit(measurements, garment);
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                const Text(
+                                  'Offline estimate',
+                                  style: TextStyle(fontWeight: FontWeight.bold),
+                                ),
+                                const Spacer(),
+                                TextButton(
+                                  onPressed: () =>
+                                      setState(() => _reportKey = null),
+                                  child: const Text('Retry'),
+                                ),
+                              ],
+                            ),
+                            ...offline.map(_FitRow.new),
+                          ],
+                        );
+                      }
+                      final report = snapshot.requireData;
+                      if (report.status == 'insufficient_data') {
+                        return Text(report.explanation);
+                      }
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Recommended size: ${report.recommendedSize ?? 'Unavailable'}',
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 18,
+                            ),
+                          ),
+                          if (report.confidence != null)
+                            Padding(
+                              padding: const EdgeInsets.only(top: 4),
+                              child: Chip(
+                                label: Text(
+                                  'Confidence: ${report.confidence!}',
+                                ),
+                              ),
+                            ),
+                          ...['bust', 'waist', 'hip'].map(
+                            (region) =>
+                                _BackendFitRow(region, report.regions[region]),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(report.explanation),
+                          const SizedBox(height: 4),
+                          Text(
+                            report.disclaimer,
+                            style: Theme.of(context).textTheme.bodySmall,
+                          ),
+                        ],
+                      );
+                    },
+                  ),
+                ],
               ),
             ),
             Padding(
@@ -291,6 +395,29 @@ class _FitRow extends StatelessWidget {
           Text(fit.note),
         ],
       ),
+    );
+  }
+}
+
+class _BackendFitRow extends StatelessWidget {
+  const _BackendFitRow(this.region, this.fit);
+  final String region;
+  final FitRegion? fit;
+
+  @override
+  Widget build(BuildContext context) {
+    final name = switch (region) {
+      'bust' => 'Bust/Chest',
+      'hip' => 'Hips',
+      _ => 'Waist',
+    };
+    final label = fit?.label.replaceAll('_', ' ') ?? 'unknown';
+    final ease = fit?.easeCm == null
+        ? ''
+        : ' (${fit!.easeCm!.toStringAsFixed(1)} cm ease)';
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 3),
+      child: Text('$name: $label$ease'),
     );
   }
 }

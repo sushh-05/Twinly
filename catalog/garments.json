@@ -38,6 +38,8 @@
             }
         },
         "stretch": "medium",
+        "sizeChartVerified": true,
+        "sizeChartSource": "demo_verified",
         "merchant": "Demo Store",
         "purchaseUrl": "https://example.com/product/dress_001"
     },
@@ -74,6 +76,8 @@
             }
         },
         "stretch": "low",
+        "sizeChartVerified": false,
+        "sizeChartSource": "demo_partial_unverified",
         "merchant": "Demo Store",
         "purchaseUrl": "https://example.com/product/shirt_001"
     }
