@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/providers/garment_state.dart';
+import '../../core/providers/theme_state.dart';
 import '../../models/garment.dart';
 import '../../widgets/garment_image.dart';
 import 'dress_details_screen.dart';
@@ -15,10 +16,20 @@ class CatalogScreen extends ConsumerStatefulWidget {
 }
 
 class _CatalogScreenState extends ConsumerState<CatalogScreen> {
+  String _selectedCategory = 'All Dresses';
   String _selectedBrand = 'All';
   String _searchQuery = '';
   bool _isSearching = false;
   final TextEditingController _searchController = TextEditingController();
+
+  final List<String> _categories = [
+    'All Dresses',
+    'Wrap Midi',
+    'A-Line',
+    'Party & Satin',
+    'Floral',
+    'Casual Poplin',
+  ];
 
   final List<String> _brands = ['All', 'Aurelia', 'Vero Moda', 'ZARA', 'H&M'];
 
@@ -28,23 +39,55 @@ class _CatalogScreenState extends ConsumerState<CatalogScreen> {
     super.dispose();
   }
 
+  bool _matchesCategory(Garment g, String cat) {
+    if (cat == 'All Dresses') return true;
+    final sil = (g.silhouette ?? '').toLowerCase();
+    final name = g.name.toLowerCase();
+    final desc = (g.description ?? '').toLowerCase();
+    final mat = (g.fabricMaterial ?? '').toLowerCase();
+
+    switch (cat) {
+      case 'Wrap Midi':
+        return sil.contains('wrap') || name.contains('wrap');
+      case 'A-Line':
+        return sil.contains('a-line') || name.contains('a-line');
+      case 'Party & Satin':
+        return mat.contains('satin') || name.contains('satin') || name.contains('party');
+      case 'Floral':
+        return name.contains('floral') || desc.contains('floral');
+      case 'Casual Poplin':
+        return mat.contains('poplin') || mat.contains('cotton') || name.contains('poplin');
+      default:
+        return true;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final catalog = ref.watch(remoteGarmentsProvider);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    final bgColor = isDark ? Colors.black : const Color(0xFFF7F8FA);
+    final cardBgColor = isDark ? const Color(0xFF161616) : Colors.white;
+    final textPrimary = isDark ? Colors.white : const Color(0xFF1F2937);
+    final textSecondary = isDark ? Colors.white54 : const Color(0xFF6B7280);
+    final chipUnselectedBg = isDark ? const Color(0xFF1C1C20) : const Color(0xFFE5E7EB);
+    final chipUnselectedText = isDark ? Colors.white70 : const Color(0xFF374151);
 
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: bgColor,
       appBar: AppBar(
-        backgroundColor: Colors.black,
+        backgroundColor: bgColor,
         elevation: 0,
+        scrolledUnderElevation: 0,
         title: _isSearching
             ? TextField(
                 controller: _searchController,
                 autofocus: true,
-                style: const TextStyle(color: Colors.white),
-                decoration: const InputDecoration(
-                  hintText: 'Search dresses, styles...',
-                  hintStyle: TextStyle(color: Colors.white38),
+                style: TextStyle(color: textPrimary),
+                decoration: InputDecoration(
+                  hintText: 'Search dresses, styles, fabrics...',
+                  hintStyle: TextStyle(color: textSecondary),
                   border: InputBorder.none,
                 ),
                 onChanged: (val) {
@@ -53,22 +96,22 @@ class _CatalogScreenState extends ConsumerState<CatalogScreen> {
                   });
                 },
               )
-            : const Row(
+            : Row(
                 children: [
                   Text(
                     'Twinly',
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 22,
-                      color: Colors.white,
+                      color: textPrimary,
                       letterSpacing: -0.5,
                     ),
                   ),
-                  SizedBox(width: 8),
+                  const SizedBox(width: 8),
                   Text(
                     'Catalog',
                     style: TextStyle(
-                      color: Colors.white38,
+                      color: textSecondary,
                       fontSize: 13,
                       fontWeight: FontWeight.normal,
                     ),
@@ -79,7 +122,7 @@ class _CatalogScreenState extends ConsumerState<CatalogScreen> {
           IconButton(
             icon: Icon(
               _isSearching ? Icons.close : Icons.search,
-              color: Colors.white,
+              color: textPrimary,
             ),
             onPressed: () {
               setState(() {
@@ -93,19 +136,70 @@ class _CatalogScreenState extends ConsumerState<CatalogScreen> {
               });
             },
           ),
+          // Theme Toggle Button (Dark / Light mode)
           IconButton(
-            icon: const Icon(Icons.refresh, color: Colors.white54, size: 20),
+            tooltip: isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode',
+            icon: Icon(
+              isDark ? Icons.light_mode_outlined : Icons.dark_mode_outlined,
+              color: isDark ? Colors.amber : Colors.indigo.shade700,
+            ),
+            onPressed: () => ref.read(themeModeProvider.notifier).toggle(),
+          ),
+          IconButton(
+            icon: Icon(Icons.refresh, color: textSecondary, size: 20),
             onPressed: () => ref.invalidate(remoteGarmentsProvider),
           ),
         ],
       ),
       body: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Category Filter Tabs
+          SizedBox(
+            height: 36,
+            child: ListView.separated(
+              padding: const EdgeInsets.symmetric(horizontal: 14),
+              scrollDirection: Axis.horizontal,
+              itemCount: _categories.length,
+              separatorBuilder: (context, index) => const SizedBox(width: 8),
+              itemBuilder: (context, index) {
+                final cat = _categories[index];
+                final isSelected = _selectedCategory == cat;
+                return ChoiceChip(
+                  label: Text(
+                    cat,
+                    style: TextStyle(
+                      color: isSelected ? Colors.white : chipUnselectedText,
+                      fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                      fontSize: 12,
+                    ),
+                  ),
+                  selected: isSelected,
+                  selectedColor: Colors.teal.shade700,
+                  backgroundColor: chipUnselectedBg,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(18),
+                    side: BorderSide(
+                      color: isSelected ? Colors.teal.shade700 : Colors.transparent,
+                    ),
+                  ),
+                  padding: const EdgeInsets.symmetric(horizontal: 4),
+                  onSelected: (_) {
+                    setState(() {
+                      _selectedCategory = cat;
+                    });
+                  },
+                );
+              },
+            ),
+          ),
+          const SizedBox(height: 8),
+
           // Brand Filter Chips Bar
           SizedBox(
-            height: 38,
+            height: 34,
             child: ListView.separated(
-              padding: const EdgeInsets.symmetric(horizontal: 12),
+              padding: const EdgeInsets.symmetric(horizontal: 14),
               scrollDirection: Axis.horizontal,
               itemCount: _brands.length,
               separatorBuilder: (context, index) => const SizedBox(width: 8),
@@ -119,21 +213,21 @@ class _CatalogScreenState extends ConsumerState<CatalogScreen> {
                   label: Text(
                     brand,
                     style: TextStyle(
-                      color: isSelected ? Colors.black : Colors.white70,
+                      color: isSelected ? Colors.black : chipUnselectedText,
                       fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-                      fontSize: 12,
+                      fontSize: 11.5,
                     ),
                   ),
                   selected: isSelected,
-                  selectedColor: Colors.teal.shade400,
-                  backgroundColor: const Color(0xFF1C1C20),
+                  selectedColor: Colors.teal.shade300,
+                  backgroundColor: chipUnselectedBg,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(16),
                     side: BorderSide(
-                      color: isSelected ? Colors.teal.shade400 : Colors.white10,
+                      color: isSelected ? Colors.teal.shade300 : Colors.transparent,
                     ),
                   ),
-                  padding: const EdgeInsets.symmetric(horizontal: 6),
+                  padding: const EdgeInsets.symmetric(horizontal: 4),
                   onSelected: (_) {
                     setState(() {
                       _selectedBrand = brand;
@@ -143,7 +237,7 @@ class _CatalogScreenState extends ConsumerState<CatalogScreen> {
               },
             ),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 10),
 
           // Garments Grid
           Expanded(
@@ -155,9 +249,9 @@ class _CatalogScreenState extends ConsumerState<CatalogScreen> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Text(
+                    Text(
                       'Unable to load the catalog.',
-                      style: TextStyle(color: Colors.white70),
+                      style: TextStyle(color: textSecondary),
                     ),
                     const SizedBox(height: 8),
                     TextButton(
@@ -169,13 +263,15 @@ class _CatalogScreenState extends ConsumerState<CatalogScreen> {
               ),
               data: (catalogState) {
                 final filtered = catalogState.garments.where((g) {
+                  final matchesCat = _matchesCategory(g, _selectedCategory);
                   final matchesBrand = _selectedBrand == 'All' ||
                       (g.brand ?? '').toLowerCase() == _selectedBrand.toLowerCase();
                   final matchesSearch = _searchQuery.isEmpty ||
                       g.name.toLowerCase().contains(_searchQuery.toLowerCase()) ||
                       (g.brand ?? '').toLowerCase().contains(_searchQuery.toLowerCase()) ||
-                      (g.silhouette ?? '').toLowerCase().contains(_searchQuery.toLowerCase());
-                  return matchesBrand && matchesSearch;
+                      (g.silhouette ?? '').toLowerCase().contains(_searchQuery.toLowerCase()) ||
+                      (g.fabricMaterial ?? '').toLowerCase().contains(_searchQuery.toLowerCase());
+                  return matchesCat && matchesBrand && matchesSearch;
                 }).toList();
 
                 if (filtered.isEmpty) {
@@ -185,24 +281,24 @@ class _CatalogScreenState extends ConsumerState<CatalogScreen> {
                       children: [
                         Image.asset(
                           'assets/images/empty_state.png',
-                          width: 130,
-                          height: 130,
+                          width: 120,
+                          height: 120,
                           errorBuilder: (context, error, stackTrace) =>
-                              const Icon(Icons.search_off, size: 60, color: Colors.white24),
+                              Icon(Icons.search_off, size: 60, color: textSecondary),
                         ),
                         const SizedBox(height: 14),
-                        const Text(
+                        Text(
                           'No dresses found',
                           style: TextStyle(
-                            color: Colors.white70,
+                            color: textPrimary,
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
                           ),
                         ),
                         const SizedBox(height: 4),
-                        const Text(
-                          'Try searching for another brand or style.',
-                          style: TextStyle(color: Colors.white38, fontSize: 13),
+                        Text(
+                          'Try choosing another category, brand, or search.',
+                          style: TextStyle(color: textSecondary, fontSize: 13),
                         ),
                       ],
                     ),
@@ -210,11 +306,11 @@ class _CatalogScreenState extends ConsumerState<CatalogScreen> {
                 }
 
                 return GridView.builder(
-                  padding: const EdgeInsets.fromLTRB(12, 4, 12, 16),
+                  padding: const EdgeInsets.fromLTRB(14, 2, 14, 20),
                   gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: 2,
-                    mainAxisSpacing: 12,
-                    crossAxisSpacing: 12,
+                    mainAxisSpacing: 14,
+                    crossAxisSpacing: 14,
                     childAspectRatio: 0.49,
                   ),
                   itemCount: filtered.length,
@@ -222,6 +318,10 @@ class _CatalogScreenState extends ConsumerState<CatalogScreen> {
                     final garment = filtered[index];
                     return _GarmentCard(
                       garment: garment,
+                      cardBgColor: cardBgColor,
+                      textPrimary: textPrimary,
+                      textSecondary: textSecondary,
+                      isDark: isDark,
                       onTap: () {
                         Navigator.of(context).push(
                           MaterialPageRoute(
@@ -247,11 +347,19 @@ class _CatalogScreenState extends ConsumerState<CatalogScreen> {
 
 class _GarmentCard extends StatefulWidget {
   final Garment garment;
+  final Color cardBgColor;
+  final Color textPrimary;
+  final Color textSecondary;
+  final bool isDark;
   final VoidCallback onTap;
   final VoidCallback onTryOn;
 
   const _GarmentCard({
     required this.garment,
+    required this.cardBgColor,
+    required this.textPrimary,
+    required this.textSecondary,
+    required this.isDark,
     required this.onTap,
     required this.onTryOn,
   });
@@ -271,13 +379,15 @@ class _GarmentCardState extends State<_GarmentCard> {
       onTap: widget.onTap,
       child: Container(
         decoration: BoxDecoration(
-          color: const Color(0xFF161616),
+          color: widget.cardBgColor,
           borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: Colors.white10),
+          border: Border.all(
+            color: widget.isDark ? Colors.white10 : Colors.black.withValues(alpha: 0.08),
+          ),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.3),
-              blurRadius: 6,
+              color: Colors.black.withValues(alpha: widget.isDark ? 0.3 : 0.05),
+              blurRadius: 8,
               offset: const Offset(0, 2),
             ),
           ],
@@ -305,7 +415,7 @@ class _GarmentCardState extends State<_GarmentCard> {
                     },
                     child: CircleAvatar(
                       radius: 14,
-                      backgroundColor: Colors.black54,
+                      backgroundColor: Colors.black.withValues(alpha: 0.45),
                       child: Icon(
                         _isFavorite ? Icons.favorite : Icons.favorite_border,
                         size: 15,
@@ -326,7 +436,7 @@ class _GarmentCardState extends State<_GarmentCard> {
                         borderRadius: BorderRadius.circular(8),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.4),
+                            color: Colors.black.withValues(alpha: 0.3),
                             blurRadius: 4,
                             offset: const Offset(0, 2),
                           ),
@@ -361,8 +471,8 @@ class _GarmentCardState extends State<_GarmentCard> {
                   if (garment.brand != null)
                     Text(
                       garment.brand!,
-                      style: const TextStyle(
-                        color: Colors.white70,
+                      style: TextStyle(
+                        color: widget.textSecondary,
                         fontSize: 11.5,
                         fontWeight: FontWeight.w600,
                         letterSpacing: 0.2,
@@ -373,9 +483,10 @@ class _GarmentCardState extends State<_GarmentCard> {
                     garment.name,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      color: Colors.white,
+                    style: TextStyle(
+                      color: widget.textPrimary,
                       fontSize: 11.5,
+                      fontWeight: FontWeight.w600,
                       height: 1.2,
                     ),
                   ),
@@ -385,16 +496,16 @@ class _GarmentCardState extends State<_GarmentCard> {
                     children: [
                       Text(
                         garment.displayPrice,
-                        style: const TextStyle(
-                          color: Colors.white,
+                        style: TextStyle(
+                          color: widget.textPrimary,
                           fontWeight: FontWeight.bold,
                           fontSize: 13.5,
                         ),
                       ),
                       Text(
                         garment.sizeRangeLabel,
-                        style: const TextStyle(
-                          color: Colors.white54,
+                        style: TextStyle(
+                          color: widget.textSecondary,
                           fontSize: 10.5,
                           fontWeight: FontWeight.w500,
                         ),

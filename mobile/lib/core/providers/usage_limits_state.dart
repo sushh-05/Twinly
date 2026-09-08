@@ -91,5 +91,13 @@ final usageLimitsProvider = NotifierProvider<UsageLimitsNotifier, UsageLimits>(
 // TEMP: forcing premium on for development so the team can test try-ons
 // and saves without hitting limits. MUST be reverted before any real
 // testing of the free-tier flow, and definitely before submission.
-// See "Usage limits — decide with team" note.
-final isPremiumProvider = Provider<bool>((ref) => true);
+class IsPremiumNotifier extends Notifier<bool> {
+  @override
+  bool build() => false;
+
+  void setPremium(bool value) => state = value;
+}
+
+final isPremiumProvider = NotifierProvider<IsPremiumNotifier, bool>(
+  IsPremiumNotifier.new,
+);

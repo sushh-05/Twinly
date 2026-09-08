@@ -22,7 +22,6 @@ class _DressDetailsScreenState extends ConsumerState<DressDetailsScreen> {
   void initState() {
     super.initState();
     if (widget.garment.availableSizes.isNotEmpty) {
-      // Pre-select 'L' if available, otherwise mid-range size
       if (widget.garment.availableSizes.contains('L')) {
         _selectedSize = 'L';
       } else {
@@ -35,16 +34,25 @@ class _DressDetailsScreenState extends ConsumerState<DressDetailsScreen> {
   @override
   Widget build(BuildContext context) {
     final d = widget.garment;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    final bgColor = isDark ? Colors.black : const Color(0xFFF9FAFB);
+    final textPrimary = isDark ? Colors.white : const Color(0xFF111827);
+    final textSecondary = isDark ? Colors.white70 : const Color(0xFF4B5563);
+    final sizeBoxBg = isDark ? const Color(0xFF222226) : Colors.white;
+    final sizeBoxBorder = isDark ? Colors.white12 : Colors.grey.shade300;
+    final buttonBg = isDark ? Colors.white : const Color(0xFF111827);
+    final buttonText = isDark ? Colors.black : Colors.white;
 
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: bgColor,
       body: Stack(
         children: [
           Column(
             children: [
               // Hero Image with Floating Controls
               SizedBox(
-                height: 400,
+                height: 410,
                 child: Stack(
                   fit: StackFit.expand,
                   children: [
@@ -80,8 +88,8 @@ class _DressDetailsScreenState extends ConsumerState<DressDetailsScreen> {
                       if (d.brand != null)
                         Text(
                           d.brand!,
-                          style: const TextStyle(
-                            color: Colors.white70,
+                          style: TextStyle(
+                            color: textSecondary,
                             fontSize: 14,
                             fontWeight: FontWeight.w500,
                           ),
@@ -89,8 +97,8 @@ class _DressDetailsScreenState extends ConsumerState<DressDetailsScreen> {
                       const SizedBox(height: 4),
                       Text(
                         d.name,
-                        style: const TextStyle(
-                          color: Colors.white,
+                        style: TextStyle(
+                          color: textPrimary,
                           fontSize: 22,
                           fontWeight: FontWeight.bold,
                           height: 1.2,
@@ -99,26 +107,28 @@ class _DressDetailsScreenState extends ConsumerState<DressDetailsScreen> {
                       const SizedBox(height: 8),
                       Text(
                         d.displayPrice,
-                        style: const TextStyle(
-                          color: Colors.white,
+                        style: TextStyle(
+                          color: textPrimary,
                           fontSize: 18,
                           fontWeight: FontWeight.w700,
                         ),
                       ),
                       const SizedBox(height: 18),
-                      _detailLine('Dress silhouette:', d.silhouette ?? 'Wrap midi dress'),
+                      _detailLine('Dress silhouette:', d.silhouette ?? 'Wrap midi dress', textSecondary, textPrimary),
                       _detailLine(
                         'Fabric stretch:',
                         d.stretch != null ? '${d.stretch!} stretch' : 'Low stretch',
+                        textSecondary,
+                        textPrimary,
                       ),
                       if (d.fabricMaterial != null && d.fabricMaterial!.isNotEmpty)
-                        _detailLine('Fabric material:', d.fabricMaterial!),
+                        _detailLine('Fabric material:', d.fabricMaterial!, textSecondary, textPrimary),
                       const SizedBox(height: 20),
 
                       // Size Selector
-                      const Text(
+                      Text(
                         'Size',
-                        style: TextStyle(color: Colors.white70, fontSize: 13, fontWeight: FontWeight.w500),
+                        style: TextStyle(color: textSecondary, fontSize: 13, fontWeight: FontWeight.w500),
                       ),
                       const SizedBox(height: 10),
                       Row(
@@ -133,17 +143,31 @@ class _DressDetailsScreenState extends ConsumerState<DressDetailsScreen> {
                                 height: 44,
                                 alignment: Alignment.center,
                                 decoration: BoxDecoration(
-                                  color: isSelected ? Colors.white : const Color(0xFF222226),
+                                  color: isSelected
+                                      ? (isDark ? Colors.white : Colors.black)
+                                      : sizeBoxBg,
                                   borderRadius: BorderRadius.circular(10),
                                   border: Border.all(
-                                    color: isSelected ? Colors.white : Colors.white12,
+                                    color: isSelected
+                                        ? (isDark ? Colors.white : Colors.black)
+                                        : sizeBoxBorder,
                                     width: 1.2,
                                   ),
+                                  boxShadow: [
+                                    if (!isDark && !isSelected)
+                                      BoxShadow(
+                                        color: Colors.black.withValues(alpha: 0.04),
+                                        blurRadius: 4,
+                                        offset: const Offset(0, 1),
+                                      ),
+                                  ],
                                 ),
                                 child: Text(
                                   s,
                                   style: TextStyle(
-                                    color: isSelected ? Colors.black : Colors.white,
+                                    color: isSelected
+                                        ? (isDark ? Colors.black : Colors.white)
+                                        : textPrimary,
                                     fontWeight: FontWeight.bold,
                                     fontSize: 14,
                                   ),
@@ -160,22 +184,22 @@ class _DressDetailsScreenState extends ConsumerState<DressDetailsScreen> {
                         child: InkWell(
                           onTap: () => SizeChartSheet.show(context, d),
                           borderRadius: BorderRadius.circular(8),
-                          child: const Padding(
-                            padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 Text(
                                   'View size chart',
                                   style: TextStyle(
-                                    color: Colors.white70,
+                                    color: textSecondary,
                                     fontSize: 13.5,
                                     decoration: TextDecoration.underline,
-                                    decorationColor: Colors.white38,
+                                    decorationColor: textSecondary.withValues(alpha: 0.5),
                                   ),
                                 ),
-                                SizedBox(width: 4),
-                                Icon(Icons.chevron_right, color: Colors.white70, size: 18),
+                                const SizedBox(width: 4),
+                                Icon(Icons.chevron_right, color: textSecondary, size: 18),
                               ],
                             ),
                           ),
@@ -203,17 +227,17 @@ class _DressDetailsScreenState extends ConsumerState<DressDetailsScreen> {
                   context.go('/fitting');
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.white,
-                  foregroundColor: Colors.black,
+                  backgroundColor: buttonBg,
+                  foregroundColor: buttonText,
                   elevation: 6,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(26),
                   ),
                 ),
-                child: const Text(
+                child: Text(
                   'Check my fit',
                   style: TextStyle(
-                    color: Colors.black,
+                    color: buttonText,
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
                     letterSpacing: 0.2,
@@ -227,17 +251,17 @@ class _DressDetailsScreenState extends ConsumerState<DressDetailsScreen> {
     );
   }
 
-  Widget _detailLine(String label, String value) {
+  Widget _detailLine(String label, String value, Color labelColor, Color valueColor) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 6),
       child: RichText(
         text: TextSpan(
-          style: const TextStyle(color: Colors.white70, fontSize: 13.5),
+          style: TextStyle(color: labelColor, fontSize: 13.5),
           children: [
             TextSpan(text: '$label '),
             TextSpan(
               text: value,
-              style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
+              style: TextStyle(color: valueColor, fontWeight: FontWeight.w600),
             ),
           ],
         ),

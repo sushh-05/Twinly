@@ -1,66 +1,53 @@
-# Person 3 Deliverables — Assets, Catalog Data, Quality & Demo
+# Person 3 Deliverables — Assets, Catalog Data, Quality, UI & Demo
 **Branch:** `priyanka`  
 **Author:** Priyanka (Person 3)  
-**Deliverables:** Catalog assets, verified brand size charts, neutral avatars, UI integration, and quality testing.
+**Deliverables:** Catalog assets, verified brand size charts, neutral avatars, light/dark mode UI, categories, dress details, fitting analytics, and quality testing.
 
 ---
 
 ## 📌 Overview
 
-This branch delivers all **Person 3** responsibilities outlined in the Shipaton build plan:
+This branch delivers all **Person 3** responsibilities outlined in the Shipaton build plan and Figma UX specifications:
 1. **Curated & Verified Dress Catalog:** 8 real-world dress products from leading brands (**Aurelia**, **Vero Moda**, **ZARA**, **H&M**).
-2. **Verified Size Charts:** Authentic tailoring measurements in **cm** (Bust, Waist, Hip, Length) across sizes **S, M, L, XL** with fabric stretch and silhouette metadata.
-3. **High-Fidelity Assets:**
+2. **Fashion Categories & Brand Filters:**
+   - **Categories**: `All Dresses`, `Wrap Midi`, `A-Line`, `Party & Satin`, `Floral`, `Casual Poplin`
+   - **Brands**: `All`, `Aurelia`, `Vero Moda`, `ZARA`, `H&M`
+3. **Dynamic Light & Dark Theme System:**
+   - One-tap toggle via AppBar or Account settings.
+   - **Dark Theme**: OLED pitch black (`#000000`) with sleek `#161616` cards and teal accents (`#26A69A`).
+   - **Light Theme**: Crisp `#F7F8FA` background, pure white `#FFFFFF` cards, dark charcoal typography, and subtle shadows.
+4. **Verified Size Charts:** Authentic tailoring measurements in **cm** (Bust, Waist, Hip, Length) across sizes **S, M, L, XL** with fabric stretch and silhouette metadata.
+5. **High-Fidelity Assets:**
    - 8 product catalog photos standardized to 600×800 px (3:4 portrait ratio).
    - 6 neutral 3D avatar placeholders (Female/Male × Slim/Average/Curvy/Broad).
    - App branding assets: `app_logo.png`, `empty_state.png`, and `placeholder_dress.png`.
-4. **Data Synchronization:** Updated `catalog/garments.json`, `catalog/size_charts.json`, and `catalog/dresses.json` to feed both the backend API and offline mobile catalog.
-5. **Flutter Mobile UI Upgrades:**
-   - Brand filter chips (`All`, `Aurelia`, `Vero Moda`, `ZARA`, `H&M`).
-   - Image rendering widget (`GarmentImage`) with local asset priority and network fallback.
-   - Verified size chart badge with interactive inspection modal (`SizeChartSheet`).
-   - Clean card styling with ₹ INR pricing and zero overflow.
-6. **Testing & QA:** Zero lint warnings on `flutter analyze`, 100% passing tests (`flutter test`), and verified live execution on Android emulator (`API 35`).
+6. **Figma Screen Implementation:**
+   - **Catalog Screen**: Verified badges, interactive search, favorite hearts, individual teal `Try on` button per card.
+   - **Dress Details Screen**: Hero studio imagery, silhouette/stretch specs, interactive `S/M/L/XL` selector, `View size chart` link, and `Check my fit` CTA.
+   - **Structural Size Chart Sheet**: Modal displaying tailored bust, waist, and length ranges in cm.
+   - **Fitting Screen**: Color-coded fit breakdown (`Bust`, `Waist`, `Hips`, `Length`), explainable `Why L?` box, avatar/dress visual toggle, and `Save look` overlay with quota enforcement.
+   - **Account Screen**: Greeting (`Hi, Anushila`), real-time usage progress bars (try-ons and saves remaining), theme switcher, photo privacy consent dialog, and avatar data deletion.
+   - **Paywall Screen**: Golden Crown presentation (`Unlock Twinly Premium`), feature checklist, mock purchase upgrade.
+7. **Testing & QA:** Zero lint warnings on `flutter analyze` (`0 issues`), 100% passing tests (`flutter test`), and verified on Android emulator (`API 35`).
 
 ---
 
 ## 👗 Verified Dresses Catalog
 
-| ID | Brand | Name | Silhouette | Fabric Stretch & Material | Price | Local Asset |
+| ID | Brand | Name | Category & Silhouette | Fabric Stretch & Material | Price | Local Asset |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| `dress_aurelia_01` | **Aurelia** | Blue Floral Wrap Midi Dress | Wrap midi | Low stretch • 100% Rayon Viscose | ₹2,499 | `assets/dresses/dress_aurelia_blue.png` |
-| `dress_veromoda_02` | **Vero Moda** | Charcoal Floral Wrap Midi Dress | Wrap midi | Medium stretch • 95% Poly, 5% Elastane | ₹2,499 | `assets/dresses/dress_veromoda_charcoal.png` |
-| `dress_zara_03` | **ZARA** | Printed Satin Wrap Midi Dress | Wrap midi | Non-stretch • 100% Satin Viscose | ₹3,590 | `assets/dresses/dress_zara_satin.png` |
-| `dress_hm_04` | **H&M** | Floral V-Neck Smocked Dress | A-line midi | High stretch • 98% Cotton, 2% Elastane | ₹1,999 | `assets/dresses/dress_hm_floral.png` |
-| `dress_aurelia_05` | **Aurelia** | Coral Red A-Line Wrap Midi Dress | A-line midi | Low stretch • 100% Chanderi Viscose | ₹2,499 | `assets/dresses/dress_aurelia_coral.png` |
-| `dress_aurelia_06` | **Aurelia** | Sage Mint Floral Wrap Midi Dress | Wrap midi | Low stretch • 100% Cotton Cambric | ₹2,499 | `assets/dresses/dress_aurelia_sage.png` |
-| `dress_veromoda_07` | **Vero Moda** | Maroon Wine Wrap Midi Dress | Wrap midi | Medium stretch • 97% Crepe, 3% Spandex | ₹2,499 | `assets/dresses/dress_veromoda_maroon.png` |
-| `dress_zara_08` | **ZARA** | Poplin Cut-Out Tiered Dress | Tiered midi | Low stretch • 100% Cotton Poplin | ₹2,990 | `assets/dresses/dress_zara_poplin.png` |
-
-### Measurement Standard (cm)
-Every garment includes verified tailoring dimensions across `S`, `M`, `L`, and `XL`:
-- **Bust Range (cm)**
-- **Waist Range (cm)**
-- **Hip Range (cm)**
-- **Length (cm)**
+| `dress_aurelia_01` | **Aurelia** | Blue Floral Wrap Midi Dress | Wrap Midi • Floral | Low stretch • 100% Rayon Viscose | ₹2,499 | `assets/dresses/dress_aurelia_blue.png` |
+| `dress_veromoda_02` | **Vero Moda** | Charcoal Floral Wrap Midi Dress | Wrap Midi • Floral | Medium stretch • 95% Poly, 5% Elastane | ₹2,499 | `assets/dresses/dress_veromoda_charcoal.png` |
+| `dress_zara_03` | **ZARA** | Printed Satin Wrap Midi Dress | Party & Satin • Wrap | Non-stretch • 100% Satin Viscose | ₹3,590 | `assets/dresses/dress_zara_satin.png` |
+| `dress_hm_04` | **H&M** | Floral V-Neck Smocked Dress | A-Line • Floral | High stretch • 98% Cotton, 2% Elastane | ₹1,999 | `assets/dresses/dress_hm_floral.png` |
+| `dress_aurelia_05` | **Aurelia** | Coral Red A-Line Wrap Midi Dress | A-Line • Wrap | Low stretch • 100% Chanderi Viscose | ₹2,499 | `assets/dresses/dress_aurelia_coral.png` |
+| `dress_aurelia_06` | **Aurelia** | Sage Mint Floral Wrap Midi Dress | Wrap Midi • Floral | Low stretch • 100% Cotton Cambric | ₹2,499 | `assets/dresses/dress_aurelia_sage.png` |
+| `dress_veromoda_07` | **Vero Moda** | Maroon Wine Wrap Midi Dress | Wrap Midi • Crepe | Medium stretch • 97% Crepe, 3% Spandex | ₹2,499 | `assets/dresses/dress_veromoda_maroon.png` |
+| `dress_zara_08` | **ZARA** | Poplin Cut-Out Tiered Dress | Casual Poplin • Tiered | Low stretch • 100% Cotton Poplin | ₹2,990 | `assets/dresses/dress_zara_poplin.png` |
 
 ---
 
-## 👤 Neutral Avatar Placeholders
-
-Located in `mobile/assets/avatars/`:
-- `avatar_female_slim.png`
-- `avatar_female_average.png`
-- `avatar_female_curvy.png`
-- `avatar_male_slim.png`
-- `avatar_male_average.png`
-- `avatar_male_broad.png`
-
-These can be used as lightweight fallbacks when 3D WebView loading is delayed, or as selection thumbnails in the avatar onboarding customizer.
-
----
-
-## 📂 File & Directory Changes
+## 📂 File & Directory Architecture
 
 ```text
 Twinly/
@@ -78,11 +65,19 @@ Twinly/
     │   └── data/dresses.json                <-- Offline bundled catalog
     └── lib/
         ├── models/garment.dart              <-- Extended with brand, imagery, price & verified chart
-        ├── core/data/garment_catalog.dart   <-- 8 verified dresses populated in offline fallback
+        ├── core/
+        │   ├── providers/theme_state.dart   <-- Riverpod NotifierProvider for Light/Dark mode
+        │   └── data/garment_catalog.dart   <-- 8 verified dresses populated in offline fallback
         ├── widgets/
         │   ├── garment_image.dart           <-- Asset-first image loader with network fallback
-        │   └── size_chart_sheet.dart        <-- 4-column modal sheet for size measurements
-        └── features/catalog/screen.dart     <-- Upgraded catalog with brand filters & verified badges
+        │   └── size_chart_sheet.dart        <-- 4-column modal sheet for structural measurements
+        └── features/
+            ├── catalog/
+            │   ├── screen.dart              <-- Light/Dark catalog with category tabs & brand chips
+            │   └── dress_details_screen.dart <-- Hero details screen with size selector & CTA
+            ├── fitting/screen.dart          <-- Fit breakdown, Why [Size] box, save look modal
+            ├── account/screen.dart          <-- Free plan usage bars, theme switcher, privacy controls
+            └── paywall/screen.dart          <-- Unlock Twinly Premium with Golden Crown presentation
 ```
 
 ---
@@ -108,10 +103,20 @@ flutter test --no-pub
 cd mobile
 flutter run
 ```
-1. Open the **Catalog** tab.
-2. Filter by brand (**Aurelia**, **Vero Moda**, **ZARA**, **H&M**).
-3. Tap the **ruler / tape-measure icon** on any dress card to open the **Structural Size Chart** bottom sheet.
-4. Select a garment and tap **Try on** to proceed to the 3D fitting flow.
+- **Phase 1 Complete UI Overhaul (Catalog, Details, Fitting, Avatar, Paywall, Auth & Multi-Person Profiles)**:
+  - **Account Screen Clean Session Management**: Removed redundant "Create new account" button from the bottom of Account Screen; kept only the prominent, secure "Log out" button with confirmation dialog.
+  - **Best-in-Class Auth & Onboarding (`SignInSignUpScreen`)**:
+    - Segmented switcher for **Create Account** and **Sign In**.
+    - Account creation captures **Full Name**, **Email**, **Password**, **Body Frame / Gender** (Feminine vs Masculine styled cards), and **Standard Size Presets** (`XS`, `S`, `M`, `L`, `XL`, `XXL`).
+    - Live real-time preview of starting dimensions (`Height`, `Bust/Chest`, `Waist`, `Hip`).
+    - Quick guest mode bypass for demo testing.
+  - **Multiple Named Avatar Profiles Under One Account**:
+    - Users can save and switch between multiple named person profiles under their single login (e.g. "Priya (Me)", "Sister", "Mom", "Friend").
+    - Profile Switcher banner embedded at the top of both **Fitting Screen** and **Avatar Screen**.
+    - Tapping the banner opens the **Avatar Profiles Bottom Sheet** with instant switching, deleting, and a dialog to "+ Add another person / profile".
+    - Size presets and custom centimetre sliders update immediately per person.
+    - Saved looks record which person the garment was fitted for.
+  - **Router & Theme Stability**: Navigation route caching ensures dark/light mode switches maintain the user's exact screen without unwanted navigation resets.
 
 ---
 
@@ -121,7 +126,7 @@ To stage, commit, and push these deliverables to your remote `priyanka` branch o
 
 ```powershell
 git add .
-git commit -m "feat(catalog): add Person 3 verified dresses, size charts, avatars, and catalog UI"
+git commit -m "feat(catalog): add categories, dark/light theme, dress details, and fitting analytics UI"
 git push -u origin priyanka
 ```
 

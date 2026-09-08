@@ -8,7 +8,10 @@ import 'package:purchases_flutter/purchases_flutter.dart';
 
 import 'firebase_options.dart';
 
+import 'package:go_router/go_router.dart';
+
 import 'core/router.dart';
+import 'core/providers/theme_state.dart';
 import 'core/providers/user_profile_state.dart';
 
 // Supply these only for a build that should use real purchases:
@@ -63,25 +66,76 @@ Future<void> _configureRevenueCat() async {
   await Purchases.configure(PurchasesConfiguration(apiKey));
 }
 
-class TwinlyApp extends StatelessWidget {
+class TwinlyApp extends ConsumerStatefulWidget {
   const TwinlyApp({super.key, required this.initialLocation});
 
   final String initialLocation;
 
   @override
+  ConsumerState<TwinlyApp> createState() => _TwinlyAppState();
+}
+
+class _TwinlyAppState extends ConsumerState<TwinlyApp> {
+  late final GoRouter _router;
+
+  @override
+  void initState() {
+    super.initState();
+    _router = createRouter(initialLocation: widget.initialLocation);
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final themeMode = ref.watch(themeModeProvider);
+
     return MaterialApp.router(
       title: 'Twinly',
       debugShowCheckedModeBanner: false,
+      themeMode: themeMode,
       theme: ThemeData(
+        brightness: Brightness.light,
+        scaffoldBackgroundColor: const Color(0xFFF7F8FA),
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: Colors.teal,
+          brightness: Brightness.light,
+          surface: Colors.white,
+        ),
+        appBarTheme: const AppBarTheme(
+          backgroundColor: Colors.white,
+          foregroundColor: Colors.black87,
+          elevation: 0,
+        ),
+        cardTheme: CardThemeData(
+          color: Colors.white,
+          elevation: 1,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+        ),
+        useMaterial3: true,
+      ),
+      darkTheme: ThemeData(
+        brightness: Brightness.dark,
+        scaffoldBackgroundColor: Colors.black,
         colorScheme: ColorScheme.fromSeed(
           seedColor: Colors.teal,
           brightness: Brightness.dark,
+          surface: const Color(0xFF161616),
         ),
-        scaffoldBackgroundColor: Colors.black,
+        appBarTheme: const AppBarTheme(
+          backgroundColor: Colors.black,
+          foregroundColor: Colors.white,
+          elevation: 0,
+        ),
+        cardTheme: CardThemeData(
+          color: const Color(0xFF161616),
+          elevation: 2,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(14),
+            side: const BorderSide(color: Colors.white10),
+          ),
+        ),
         useMaterial3: true,
       ),
-      routerConfig: createRouter(initialLocation: initialLocation),
+      routerConfig: _router,
     );
   }
 }
