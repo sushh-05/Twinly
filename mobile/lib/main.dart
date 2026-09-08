@@ -74,7 +74,11 @@ class TwinlyApp extends StatelessWidget {
       title: 'Twinly',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: Colors.teal,
+          brightness: Brightness.dark,
+        ),
+        scaffoldBackgroundColor: Colors.black,
         useMaterial3: true,
       ),
       routerConfig: createRouter(initialLocation: initialLocation),

@@ -1,0 +1,386 @@
+[
+  {
+    "id": "dress_aurelia_01",
+    "brand": "Aurelia",
+    "name": "Blue Floral Wrap Midi Dress",
+    "price": 2499,
+    "currency": "INR",
+    "currencySymbol": "₹",
+    "silhouette": "Wrap midi dress",
+    "fabricStretch": "Low stretch",
+    "fabricMaterial": "100% Rayon Viscose",
+    "verifiedSizeChart": true,
+    "isFavorite": false,
+    "availableSizes": ["S", "M", "L", "XL"],
+    "assetImagePath": "assets/dresses/dress_aurelia_blue.png",
+    "fallbackImageUrl": "https://images.unsplash.com/photo-1572804013309-59a88b7e92f1?w=800&q=80",
+    "description": "Elegant navy blue wrap midi dress crafted in breathable viscose with delicate floral prints. Features a surplice V-neckline, self-tie waist cinch, and fluid flounce hemline.",
+    "sizeChartUnit": "cm",
+    "sizeChart": [
+      {
+        "size": "S",
+        "bustRange": "84 - 88",
+        "waistRange": "66 - 70",
+        "hipRange": "91 - 95",
+        "lengthCm": "114"
+      },
+      {
+        "size": "M",
+        "bustRange": "89 - 93",
+        "waistRange": "71 - 75",
+        "hipRange": "96 - 100",
+        "lengthCm": "116"
+      },
+      {
+        "size": "L",
+        "bustRange": "94 - 98",
+        "waistRange": "76 - 80",
+        "hipRange": "101 - 105",
+        "lengthCm": "118"
+      },
+      {
+        "size": "XL",
+        "bustRange": "99 - 104",
+        "waistRange": "81 - 86",
+        "hipRange": "106 - 111",
+        "lengthCm": "120"
+      }
+    ]
+  },
+  {
+    "id": "dress_veromoda_02",
+    "brand": "Vero Moda",
+    "name": "Charcoal Floral Wrap Midi Dress",
+    "price": 2499,
+    "currency": "INR",
+    "currencySymbol": "₹",
+    "silhouette": "Wrap midi dress",
+    "fabricStretch": "Medium stretch",
+    "fabricMaterial": "95% Polyester, 5% Elastane",
+    "verifiedSizeChart": true,
+    "isFavorite": false,
+    "availableSizes": ["S", "M", "L", "XL"],
+    "assetImagePath": "assets/dresses/dress_veromoda_charcoal.png",
+    "fallbackImageUrl": "https://images.unsplash.com/photo-1515372039744-b8f02a3ae446?w=800&q=80",
+    "description": "Chic dark charcoal midi dress adorned with subtle cream blossom print. High-low hemline with a structured waist tie that flatters natural waist curves.",
+    "sizeChartUnit": "cm",
+    "sizeChart": [
+      {
+        "size": "S",
+        "bustRange": "82 - 86",
+        "waistRange": "64 - 68",
+        "hipRange": "90 - 94",
+        "lengthCm": "112"
+      },
+      {
+        "size": "M",
+        "bustRange": "87 - 91",
+        "waistRange": "69 - 73",
+        "hipRange": "95 - 99",
+        "lengthCm": "114"
+      },
+      {
+        "size": "L",
+        "bustRange": "92 - 96",
+        "waistRange": "74 - 78",
+        "hipRange": "100 - 104",
+        "lengthCm": "116"
+      },
+      {
+        "size": "XL",
+        "bustRange": "97 - 102",
+        "waistRange": "79 - 84",
+        "hipRange": "105 - 110",
+        "lengthCm": "118"
+      }
+    ]
+  },
+  {
+    "id": "dress_zara_03",
+    "brand": "ZARA",
+    "name": "Printed Satin Wrap Midi Dress",
+    "price": 3590,
+    "currency": "INR",
+    "currencySymbol": "₹",
+    "silhouette": "Wrap midi dress",
+    "fabricStretch": "Non-stretch",
+    "fabricMaterial": "100% Satin finish Viscose",
+    "verifiedSizeChart": true,
+    "isFavorite": true,
+    "availableSizes": ["S", "M", "L", "XL"],
+    "assetImagePath": "assets/dresses/dress_zara_satin.png",
+    "fallbackImageUrl": "https://images.unsplash.com/photo-1496747611176-843222e1e57c?w=800&q=80",
+    "description": "Official Zara studio collection satin midi dress. Features deep surplice neckline, draped wrap front, long bishop sleeves with covered button cuffs, and asymmetric draped hem.",
+    "sizeChartUnit": "cm",
+    "sizeChart": [
+      {
+        "size": "S",
+        "bustRange": "84 - 88",
+        "waistRange": "64 - 68",
+        "hipRange": "92 - 96",
+        "lengthCm": "120"
+      },
+      {
+        "size": "M",
+        "bustRange": "88 - 92",
+        "waistRange": "68 - 72",
+        "hipRange": "96 - 100",
+        "lengthCm": "122"
+      },
+      {
+        "size": "L",
+        "bustRange": "94 - 98",
+        "waistRange": "74 - 78",
+        "hipRange": "102 - 106",
+        "lengthCm": "124"
+      },
+      {
+        "size": "XL",
+        "bustRange": "100 - 104",
+        "waistRange": "80 - 84",
+        "hipRange": "108 - 112",
+        "lengthCm": "126"
+      }
+    ]
+  },
+  {
+    "id": "dress_hm_04",
+    "brand": "H&M",
+    "name": "Floral V-Neck Smocked Dress",
+    "price": 1999,
+    "currency": "INR",
+    "currencySymbol": "₹",
+    "silhouette": "A-line midi dress",
+    "fabricStretch": "High stretch",
+    "fabricMaterial": "98% Cotton, 2% Elastane",
+    "verifiedSizeChart": true,
+    "isFavorite": false,
+    "availableSizes": ["S", "M", "L", "XL"],
+    "assetImagePath": "assets/dresses/dress_hm_floral.png",
+    "fallbackImageUrl": "https://images.unsplash.com/photo-1585487000160-6ebcfceb0d03?w=800&q=80",
+    "description": "Authentic H&M Conscious Choice floral calf-length dress in crisp organic cotton poplin. Smocked bodice with stretch adaptability, sweetheart neckline, and gathered puff sleeves.",
+    "sizeChartUnit": "cm",
+    "sizeChart": [
+      {
+        "size": "S",
+        "bustRange": "84 - 88",
+        "waistRange": "68 - 72",
+        "hipRange": "92 - 96",
+        "lengthCm": "115"
+      },
+      {
+        "size": "M",
+        "bustRange": "92 - 96",
+        "waistRange": "76 - 80",
+        "hipRange": "100 - 104",
+        "lengthCm": "117"
+      },
+      {
+        "size": "L",
+        "bustRange": "100 - 104",
+        "waistRange": "84 - 88",
+        "hipRange": "108 - 112",
+        "lengthCm": "119"
+      },
+      {
+        "size": "XL",
+        "bustRange": "110 - 116",
+        "waistRange": "94 - 100",
+        "hipRange": "117 - 122",
+        "lengthCm": "121"
+      }
+    ]
+  },
+  {
+    "id": "dress_aurelia_05",
+    "brand": "Aurelia",
+    "name": "Coral Red A-Line Wrap Midi Dress",
+    "price": 2499,
+    "currency": "INR",
+    "currencySymbol": "₹",
+    "silhouette": "A-line midi dress",
+    "fabricStretch": "Low stretch",
+    "fabricMaterial": "100% Chanderi Viscose",
+    "verifiedSizeChart": true,
+    "isFavorite": false,
+    "availableSizes": ["S", "M", "L", "XL"],
+    "assetImagePath": "assets/dresses/dress_aurelia_coral.png",
+    "fallbackImageUrl": "https://images.unsplash.com/photo-1595777457583-95e059d581b8?w=800&q=80",
+    "description": "Rich coral red midi dress with side tie fastening and a tailored bodice. Features flared A-line silhouette that drops into a graceful swish.",
+    "sizeChartUnit": "cm",
+    "sizeChart": [
+      {
+        "size": "S",
+        "bustRange": "86 - 90",
+        "waistRange": "68 - 72",
+        "hipRange": "94 - 98",
+        "lengthCm": "115"
+      },
+      {
+        "size": "M",
+        "bustRange": "91 - 95",
+        "waistRange": "73 - 77",
+        "hipRange": "99 - 103",
+        "lengthCm": "117"
+      },
+      {
+        "size": "L",
+        "bustRange": "96 - 100",
+        "waistRange": "78 - 82",
+        "hipRange": "104 - 108",
+        "lengthCm": "119"
+      },
+      {
+        "size": "XL",
+        "bustRange": "101 - 106",
+        "waistRange": "83 - 88",
+        "hipRange": "109 - 114",
+        "lengthCm": "121"
+      }
+    ]
+  },
+  {
+    "id": "dress_aurelia_06",
+    "brand": "Aurelia",
+    "name": "Sage Mint Floral Wrap Midi Dress",
+    "price": 2499,
+    "currency": "INR",
+    "currencySymbol": "₹",
+    "silhouette": "Wrap midi dress",
+    "fabricStretch": "Low stretch",
+    "fabricMaterial": "100% Lightweight Cotton Cambric",
+    "verifiedSizeChart": true,
+    "isFavorite": false,
+    "availableSizes": ["S", "M", "L", "XL"],
+    "assetImagePath": "assets/dresses/dress_aurelia_sage.png",
+    "fallbackImageUrl": "https://images.unsplash.com/photo-1618932260643-eee4a2f652a6?w=800&q=80",
+    "description": "Refreshing pastel sage green midi dress featuring dainty botanical sprigs. Flattering crossover neckline with tailored flutter sleeves and curved ruffled border.",
+    "sizeChartUnit": "cm",
+    "sizeChart": [
+      {
+        "size": "S",
+        "bustRange": "84 - 88",
+        "waistRange": "66 - 70",
+        "hipRange": "92 - 96",
+        "lengthCm": "114"
+      },
+      {
+        "size": "M",
+        "bustRange": "89 - 93",
+        "waistRange": "71 - 75",
+        "hipRange": "97 - 101",
+        "lengthCm": "116"
+      },
+      {
+        "size": "L",
+        "bustRange": "94 - 98",
+        "waistRange": "76 - 80",
+        "hipRange": "102 - 106",
+        "lengthCm": "118"
+      },
+      {
+        "size": "XL",
+        "bustRange": "99 - 104",
+        "waistRange": "81 - 86",
+        "hipRange": "107 - 112",
+        "lengthCm": "120"
+      }
+    ]
+  },
+  {
+    "id": "dress_veromoda_07",
+    "brand": "Vero Moda",
+    "name": "Maroon Wine Wrap Midi Dress",
+    "price": 2499,
+    "currency": "INR",
+    "currencySymbol": "₹",
+    "silhouette": "Wrap midi dress",
+    "fabricStretch": "Medium stretch",
+    "fabricMaterial": "97% Crepe, 3% Spandex",
+    "verifiedSizeChart": true,
+    "isFavorite": false,
+    "availableSizes": ["S", "M", "L", "XL"],
+    "assetImagePath": "assets/dresses/dress_veromoda_maroon.png",
+    "fallbackImageUrl": "https://images.unsplash.com/photo-1539109136881-3be0616acf4b?w=800&q=80",
+    "description": "Deep burgundy maroon crepe wrap dress with a graceful fluid drape. Designed with an adjustable interior anchor button and wide waist sash for precise fitting.",
+    "sizeChartUnit": "cm",
+    "sizeChart": [
+      {
+        "size": "S",
+        "bustRange": "82 - 86",
+        "waistRange": "64 - 68",
+        "hipRange": "90 - 94",
+        "lengthCm": "113"
+      },
+      {
+        "size": "M",
+        "bustRange": "87 - 91",
+        "waistRange": "69 - 73",
+        "hipRange": "95 - 99",
+        "lengthCm": "115"
+      },
+      {
+        "size": "L",
+        "bustRange": "92 - 96",
+        "waistRange": "74 - 78",
+        "hipRange": "100 - 104",
+        "lengthCm": "117"
+      },
+      {
+        "size": "XL",
+        "bustRange": "97 - 102",
+        "waistRange": "79 - 84",
+        "hipRange": "105 - 110",
+        "lengthCm": "119"
+      }
+    ]
+  },
+  {
+    "id": "dress_zara_08",
+    "brand": "ZARA",
+    "name": "Poplin Cut-Out Tiered Dress",
+    "price": 2990,
+    "currency": "INR",
+    "currencySymbol": "₹",
+    "silhouette": "Tiered midi dress",
+    "fabricStretch": "Low stretch",
+    "fabricMaterial": "100% Cotton Poplin",
+    "verifiedSizeChart": true,
+    "isFavorite": false,
+    "availableSizes": ["S", "M", "L", "XL"],
+    "assetImagePath": "assets/dresses/dress_zara_poplin.png",
+    "fallbackImageUrl": "https://images.unsplash.com/photo-1550639525-c97d455acf70?w=800&q=80",
+    "description": "Trendy white-and-emerald structured poplin dress featuring subtle side waist cut-out details and tiered gathered ruffles for an airy modern silhouette.",
+    "sizeChartUnit": "cm",
+    "sizeChart": [
+      {
+        "size": "S",
+        "bustRange": "84 - 88",
+        "waistRange": "64 - 68",
+        "hipRange": "92 - 96",
+        "lengthCm": "118"
+      },
+      {
+        "size": "M",
+        "bustRange": "88 - 92",
+        "waistRange": "68 - 72",
+        "hipRange": "96 - 100",
+        "lengthCm": "120"
+      },
+      {
+        "size": "L",
+        "bustRange": "94 - 98",
+        "waistRange": "74 - 78",
+        "hipRange": "102 - 106",
+        "lengthCm": "122"
+      },
+      {
+        "size": "XL",
+        "bustRange": "100 - 104",
+        "waistRange": "80 - 84",
+        "hipRange": "108 - 112",
+        "lengthCm": "124"
+      }
+    ]
+  }
+]

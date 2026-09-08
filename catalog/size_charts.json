@@ -1,0 +1,346 @@
+{
+    "dress_aurelia_01": {
+        "brand": "Aurelia",
+        "name": "Blue Floral Wrap Midi Dress",
+        "unit": "cm",
+        "sizes": {
+            "S": {
+                "bustCm": 84.0,
+                "waistCm": 66.0,
+                "hipCm": 91.0,
+                "lengthCm": 114.0,
+                "bustRange": "84 - 88",
+                "waistRange": "66 - 70",
+                "hipRange": "91 - 95"
+            },
+            "M": {
+                "bustCm": 89.0,
+                "waistCm": 71.0,
+                "hipCm": 96.0,
+                "lengthCm": 116.0,
+                "bustRange": "89 - 93",
+                "waistRange": "71 - 75",
+                "hipRange": "96 - 100"
+            },
+            "L": {
+                "bustCm": 94.0,
+                "waistCm": 76.0,
+                "hipCm": 101.0,
+                "lengthCm": 118.0,
+                "bustRange": "94 - 98",
+                "waistRange": "76 - 80",
+                "hipRange": "101 - 105"
+            },
+            "XL": {
+                "bustCm": 99.0,
+                "waistCm": 81.0,
+                "hipCm": 106.0,
+                "lengthCm": 120.0,
+                "bustRange": "99 - 104",
+                "waistRange": "81 - 86",
+                "hipRange": "106 - 111"
+            }
+        }
+    },
+    "dress_veromoda_02": {
+        "brand": "Vero Moda",
+        "name": "Charcoal Floral Wrap Midi Dress",
+        "unit": "cm",
+        "sizes": {
+            "S": {
+                "bustCm": 82.0,
+                "waistCm": 64.0,
+                "hipCm": 90.0,
+                "lengthCm": 112.0,
+                "bustRange": "82 - 86",
+                "waistRange": "64 - 68",
+                "hipRange": "90 - 94"
+            },
+            "M": {
+                "bustCm": 87.0,
+                "waistCm": 69.0,
+                "hipCm": 95.0,
+                "lengthCm": 114.0,
+                "bustRange": "87 - 91",
+                "waistRange": "69 - 73",
+                "hipRange": "95 - 99"
+            },
+            "L": {
+                "bustCm": 92.0,
+                "waistCm": 74.0,
+                "hipCm": 100.0,
+                "lengthCm": 116.0,
+                "bustRange": "92 - 96",
+                "waistRange": "74 - 78",
+                "hipRange": "100 - 104"
+            },
+            "XL": {
+                "bustCm": 97.0,
+                "waistCm": 79.0,
+                "hipCm": 105.0,
+                "lengthCm": 118.0,
+                "bustRange": "97 - 102",
+                "waistRange": "79 - 84",
+                "hipRange": "105 - 110"
+            }
+        }
+    },
+    "dress_zara_03": {
+        "brand": "ZARA",
+        "name": "Printed Satin Wrap Midi Dress",
+        "unit": "cm",
+        "sizes": {
+            "S": {
+                "bustCm": 84.0,
+                "waistCm": 64.0,
+                "hipCm": 92.0,
+                "lengthCm": 120.0,
+                "bustRange": "84 - 88",
+                "waistRange": "64 - 68",
+                "hipRange": "92 - 96"
+            },
+            "M": {
+                "bustCm": 88.0,
+                "waistCm": 68.0,
+                "hipCm": 96.0,
+                "lengthCm": 122.0,
+                "bustRange": "88 - 92",
+                "waistRange": "68 - 72",
+                "hipRange": "96 - 100"
+            },
+            "L": {
+                "bustCm": 94.0,
+                "waistCm": 74.0,
+                "hipCm": 102.0,
+                "lengthCm": 124.0,
+                "bustRange": "94 - 98",
+                "waistRange": "74 - 78",
+                "hipRange": "102 - 106"
+            },
+            "XL": {
+                "bustCm": 100.0,
+                "waistCm": 80.0,
+                "hipCm": 108.0,
+                "lengthCm": 126.0,
+                "bustRange": "100 - 104",
+                "waistRange": "80 - 84",
+                "hipRange": "108 - 112"
+            }
+        }
+    },
+    "dress_hm_04": {
+        "brand": "H&M",
+        "name": "Floral V-Neck Smocked Dress",
+        "unit": "cm",
+        "sizes": {
+            "S": {
+                "bustCm": 84.0,
+                "waistCm": 68.0,
+                "hipCm": 92.0,
+                "lengthCm": 115.0,
+                "bustRange": "84 - 88",
+                "waistRange": "68 - 72",
+                "hipRange": "92 - 96"
+            },
+            "M": {
+                "bustCm": 92.0,
+                "waistCm": 76.0,
+                "hipCm": 100.0,
+                "lengthCm": 117.0,
+                "bustRange": "92 - 96",
+                "waistRange": "76 - 80",
+                "hipRange": "100 - 104"
+            },
+            "L": {
+                "bustCm": 100.0,
+                "waistCm": 84.0,
+                "hipCm": 108.0,
+                "lengthCm": 119.0,
+                "bustRange": "100 - 104",
+                "waistRange": "84 - 88",
+                "hipRange": "108 - 112"
+            },
+            "XL": {
+                "bustCm": 110.0,
+                "waistCm": 94.0,
+                "hipCm": 117.0,
+                "lengthCm": 121.0,
+                "bustRange": "110 - 116",
+                "waistRange": "94 - 100",
+                "hipRange": "117 - 122"
+            }
+        }
+    },
+    "dress_aurelia_05": {
+        "brand": "Aurelia",
+        "name": "Coral Red A-Line Wrap Midi Dress",
+        "unit": "cm",
+        "sizes": {
+            "S": {
+                "bustCm": 86.0,
+                "waistCm": 68.0,
+                "hipCm": 94.0,
+                "lengthCm": 115.0,
+                "bustRange": "86 - 90",
+                "waistRange": "68 - 72",
+                "hipRange": "94 - 98"
+            },
+            "M": {
+                "bustCm": 91.0,
+                "waistCm": 73.0,
+                "hipCm": 99.0,
+                "lengthCm": 117.0,
+                "bustRange": "91 - 95",
+                "waistRange": "73 - 77",
+                "hipRange": "99 - 103"
+            },
+            "L": {
+                "bustCm": 96.0,
+                "waistCm": 78.0,
+                "hipCm": 104.0,
+                "lengthCm": 119.0,
+                "bustRange": "96 - 100",
+                "waistRange": "78 - 82",
+                "hipRange": "104 - 108"
+            },
+            "XL": {
+                "bustCm": 101.0,
+                "waistCm": 83.0,
+                "hipCm": 109.0,
+                "lengthCm": 121.0,
+                "bustRange": "101 - 106",
+                "waistRange": "83 - 88",
+                "hipRange": "109 - 114"
+            }
+        }
+    },
+    "dress_aurelia_06": {
+        "brand": "Aurelia",
+        "name": "Sage Mint Floral Wrap Midi Dress",
+        "unit": "cm",
+        "sizes": {
+            "S": {
+                "bustCm": 84.0,
+                "waistCm": 66.0,
+                "hipCm": 92.0,
+                "lengthCm": 114.0,
+                "bustRange": "84 - 88",
+                "waistRange": "66 - 70",
+                "hipRange": "92 - 96"
+            },
+            "M": {
+                "bustCm": 89.0,
+                "waistCm": 71.0,
+                "hipCm": 97.0,
+                "lengthCm": 116.0,
+                "bustRange": "89 - 93",
+                "waistRange": "71 - 75",
+                "hipRange": "97 - 101"
+            },
+            "L": {
+                "bustCm": 94.0,
+                "waistCm": 76.0,
+                "hipCm": 102.0,
+                "lengthCm": 118.0,
+                "bustRange": "94 - 98",
+                "waistRange": "76 - 80",
+                "hipRange": "102 - 106"
+            },
+            "XL": {
+                "bustCm": 99.0,
+                "waistCm": 81.0,
+                "hipCm": 107.0,
+                "lengthCm": 120.0,
+                "bustRange": "99 - 104",
+                "waistRange": "81 - 86",
+                "hipRange": "107 - 112"
+            }
+        }
+    },
+    "dress_veromoda_07": {
+        "brand": "Vero Moda",
+        "name": "Maroon Wine Wrap Midi Dress",
+        "unit": "cm",
+        "sizes": {
+            "S": {
+                "bustCm": 82.0,
+                "waistCm": 64.0,
+                "hipCm": 90.0,
+                "lengthCm": 113.0,
+                "bustRange": "82 - 86",
+                "waistRange": "64 - 68",
+                "hipRange": "90 - 94"
+            },
+            "M": {
+                "bustCm": 87.0,
+                "waistCm": 69.0,
+                "hipCm": 95.0,
+                "lengthCm": 115.0,
+                "bustRange": "87 - 91",
+                "waistRange": "69 - 73",
+                "hipRange": "95 - 99"
+            },
+            "L": {
+                "bustCm": 92.0,
+                "waistCm": 74.0,
+                "hipCm": 100.0,
+                "lengthCm": 117.0,
+                "bustRange": "92 - 96",
+                "waistRange": "74 - 78",
+                "hipRange": "100 - 104"
+            },
+            "XL": {
+                "bustCm": 97.0,
+                "waistCm": 79.0,
+                "hipCm": 105.0,
+                "lengthCm": 119.0,
+                "bustRange": "97 - 102",
+                "waistRange": "79 - 84",
+                "hipRange": "105 - 110"
+            }
+        }
+    },
+    "dress_zara_08": {
+        "brand": "ZARA",
+        "name": "Poplin Cut-Out Tiered Dress",
+        "unit": "cm",
+        "sizes": {
+            "S": {
+                "bustCm": 84.0,
+                "waistCm": 64.0,
+                "hipCm": 92.0,
+                "lengthCm": 118.0,
+                "bustRange": "84 - 88",
+                "waistRange": "64 - 68",
+                "hipRange": "92 - 96"
+            },
+            "M": {
+                "bustCm": 88.0,
+                "waistCm": 68.0,
+                "hipCm": 96.0,
+                "lengthCm": 120.0,
+                "bustRange": "88 - 92",
+                "waistRange": "68 - 72",
+                "hipRange": "96 - 100"
+            },
+            "L": {
+                "bustCm": 94.0,
+                "waistCm": 74.0,
+                "hipCm": 102.0,
+                "lengthCm": 122.0,
+                "bustRange": "94 - 98",
+                "waistRange": "74 - 78",
+                "hipRange": "102 - 106"
+            },
+            "XL": {
+                "bustCm": 100.0,
+                "waistCm": 80.0,
+                "hipCm": 108.0,
+                "lengthCm": 124.0,
+                "bustRange": "100 - 104",
+                "waistRange": "80 - 84",
+                "hipRange": "108 - 112"
+            }
+        }
+    }
+}

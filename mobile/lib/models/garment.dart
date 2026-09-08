@@ -13,8 +13,17 @@ class Garment {
   final String? category;
   final double? price;
   final String? currency;
+  final String? currencySymbol;
   final List<String> availableSizes;
   final String? stretch;
+  final String? brand;
+  final String? silhouette;
+  final String? assetImagePath;
+  final String? fallbackImageUrl;
+  final bool verifiedSizeChart;
+  final String? fabricMaterial;
+  final String? description;
+  final Map<String, dynamic>? rawSizeChart;
 
   const Garment({
     required this.id,
@@ -27,12 +36,34 @@ class Garment {
     this.category,
     this.price,
     this.currency,
+    this.currencySymbol,
     this.availableSizes = const [],
     this.stretch,
+    this.brand,
+    this.silhouette,
+    this.assetImagePath,
+    this.fallbackImageUrl,
+    this.verifiedSizeChart = false,
+    this.fabricMaterial,
+    this.description,
+    this.rawSizeChart,
   });
 
+  String get displayPrice {
+    if (price == null) return '';
+    final sym = currencySymbol ?? (currency == 'INR' ? '₹' : '\$');
+    return '$sym${price!.toStringAsFixed(0)}';
+  }
+
+  String get sizeRangeLabel {
+    if (availableSizes.isEmpty) return 'Free size';
+    return '${availableSizes.first}-${availableSizes.last}';
+  }
+
   factory Garment.fromApi(Map<String, dynamic> json) {
-    final charts = Map<String, dynamic>.from(json['sizeChart'] as Map);
+    final charts = json['sizeChart'] is Map
+        ? Map<String, dynamic>.from(json['sizeChart'] as Map)
+        : <String, dynamic>{};
     final sizes = (json['sizes'] as List<dynamic>? ?? const [])
         .map((size) => size.toString())
         .where(charts.containsKey)
@@ -60,8 +91,17 @@ class Garment {
       category: json['category'] as String?,
       price: (json['price'] as num?)?.toDouble(),
       currency: json['currency'] as String?,
-      availableSizes: sizes,
-      stretch: json['stretch'] as String?,
+      currencySymbol: json['currencySymbol'] as String?,
+      availableSizes: sizes.isNotEmpty ? sizes : const ['S', 'M', 'L', 'XL'],
+      stretch: (json['stretch'] ?? json['fabricStretch']) as String?,
+      brand: json['brand'] as String?,
+      silhouette: json['silhouette'] as String?,
+      assetImagePath: json['assetImagePath'] as String?,
+      fallbackImageUrl: (json['fallbackImageUrl'] ?? json['imageUrl']) as String?,
+      verifiedSizeChart: json['sizeChartVerified'] == true || json['verifiedSizeChart'] == true,
+      fabricMaterial: json['fabricMaterial'] as String?,
+      description: json['description'] as String?,
+      rawSizeChart: charts,
     );
   }
 

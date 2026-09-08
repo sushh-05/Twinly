@@ -39,6 +39,10 @@ dev_dependencies:
 flutter:
   uses-material-design: true
 
-  # Asset Directories for 3D Models
+  # Asset Directories for 3D Models and Person 3 Catalog
   assets:
     - assets/models/
+    - assets/dresses/
+    - assets/avatars/
+    - assets/images/
+    - assets/data/
