@@ -4,27 +4,44 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/providers/garment_state.dart';
+import '../../core/widgets/garment_image.dart';
 import '../../models/garment.dart';
 
 class CatalogScreen extends ConsumerWidget {
   const CatalogScreen({super.key});
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final selected = ref.watch(selectedGarmentProvider);
-    final notifier = ref.read(selectedGarmentProvider.notifier);
     final catalog = ref.watch(remoteGarmentsProvider);
-
     return Scaffold(
-      appBar: AppBar(title: const Text('Catalog')),
+      backgroundColor: const Color(0xff121212),
       body: SafeArea(
         child: Column(
           children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 18, 16, 8),
+              child: Row(
+                children: [
+                  const Text(
+                    'Twinly',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 38,
+                      fontWeight: FontWeight.w300,
+                    ),
+                  ),
+                  const Spacer(),
+                  IconButton(
+                    onPressed: () {},
+                    icon: const Icon(Icons.search, color: Colors.white),
+                  ),
+                ],
+              ),
+            ),
             if (kDebugMode && catalog.hasValue)
-              Padding(
-                padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-                child: Align(
-                  alignment: Alignment.centerLeft,
+              Align(
+                alignment: Alignment.centerLeft,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
                   child: Chip(
                     label: Text(
                       catalog.requireValue.usingOfflineCatalog
@@ -37,53 +54,29 @@ class CatalogScreen extends ConsumerWidget {
             Expanded(
               child: catalog.when(
                 loading: () => const Center(child: CircularProgressIndicator()),
-                error: (_, _) => Center(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Text('Unable to load the catalog.'),
-                      TextButton(
-                        onPressed: () => ref.invalidate(remoteGarmentsProvider),
-                        child: const Text('Retry'),
-                      ),
-                    ],
+                error: (error, stackTrace) => const Center(
+                  child: Text(
+                    'Unable to load catalog',
+                    style: TextStyle(color: Colors.white),
                   ),
                 ),
-                data: (catalogState) => GridView.builder(
-                  padding: const EdgeInsets.all(16),
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                    crossAxisSpacing: 16,
-                    mainAxisSpacing: 16,
-                    childAspectRatio: 0.75,
-                  ),
-                  itemCount: catalogState.garments.length,
-                  itemBuilder: (context, index) {
-                    final garment = catalogState.garments[index];
-                    final isSelected = selected?.id == garment.id;
-                    return _GarmentCard(
-                      garment: garment,
-                      isSelected: isSelected,
-                      onTap: () => notifier.select(garment),
-                    );
-                  },
-                ),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: selected == null
-                      ? null
-                      : () => context.go('/fitting'),
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    disabledBackgroundColor: Colors.grey.shade300,
-                  ),
-                  child: const Text('Try on', style: TextStyle(fontSize: 18)),
-                ),
+                data: (state) {
+                  final dresses = state.garments
+                      .where((g) => g.category == 'dress')
+                      .toList();
+                  return GridView.builder(
+                    padding: const EdgeInsets.all(16),
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 2,
+                          crossAxisSpacing: 12,
+                          mainAxisSpacing: 14,
+                          childAspectRatio: .47,
+                        ),
+                    itemCount: dresses.length,
+                    itemBuilder: (_, i) => _Card(dresses[i]),
+                  );
+                },
               ),
             ),
           ],
@@ -93,53 +86,91 @@ class CatalogScreen extends ConsumerWidget {
   }
 }
 
-class _GarmentCard extends StatelessWidget {
-  const _GarmentCard({
-    required this.garment,
-    required this.isSelected,
-    required this.onTap,
-  });
-
-  final Garment garment;
-  final bool isSelected;
-  final VoidCallback onTap;
-
+class _Card extends ConsumerWidget {
+  const _Card(this.g);
+  final Garment g;
   @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 150),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: isSelected
-                ? Theme.of(context).colorScheme.primary
-                : Colors.grey.shade300,
-            width: isSelected ? 3 : 1,
-          ),
-        ),
-        padding: const EdgeInsets.all(8),
-        child: Column(
-          children: [
-            Expanded(
-              child: Container(
-                width: double.infinity,
-                decoration: BoxDecoration(
-                  color: garment.placeholderColor.withValues(alpha: 0.8),
-                  borderRadius: BorderRadius.circular(8),
+  Widget build(BuildContext c, WidgetRef r) => InkWell(
+    onTap: () => c.push('/catalog/detail', extra: g),
+    child: Container(
+      padding: const EdgeInsets.all(8),
+      decoration: BoxDecoration(
+        color: const Color(0xff1c1c1c),
+        borderRadius: BorderRadius.circular(17),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Stack(
+            children: [
+              GarmentImage(garment: g),
+              const Positioned(
+                right: 8,
+                top: 8,
+                child: CircleAvatar(
+                  radius: 16,
+                  backgroundColor: Color(0x88000000),
+                  child: Icon(
+                    Icons.favorite_border,
+                    color: Colors.white,
+                    size: 18,
+                  ),
                 ),
               ),
+              if (g.verifiedSizeChart)
+                const Positioned(
+                  left: 7,
+                  bottom: 7,
+                  child: Chip(
+                    label: Text(
+                      'Verified size chart',
+                      style: TextStyle(fontSize: 9, color: Colors.black),
+                    ),
+                    backgroundColor: Color(0xff62e6df),
+                    visualDensity: VisualDensity.compact,
+                  ),
+                ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Text(
+            g.brand ?? 'Twinly Edit',
+            style: const TextStyle(color: Colors.white60, fontSize: 11),
+          ),
+          Text(
+            g.name,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.w600,
             ),
-            const SizedBox(height: 8),
-            Text(
-              garment.name,
-              textAlign: TextAlign.center,
-              style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
+          ),
+          Text(
+            '${g.currencySymbol ?? '₹'}${g.price?.toStringAsFixed(0) ?? ''}',
+            style: const TextStyle(color: Colors.white, fontSize: 16),
+          ),
+          Text(
+            'Sizes: ${g.availableSizes.isEmpty ? '—' : '${g.availableSizes.first}–${g.availableSizes.last}'}',
+            style: const TextStyle(color: Colors.white60, fontSize: 11),
+          ),
+          const Spacer(),
+          SizedBox(
+            width: double.infinity,
+            child: FilledButton(
+              onPressed: () {
+                r.read(selectedGarmentProvider.notifier).select(g);
+                c.go('/fitting');
+              },
+              style: FilledButton.styleFrom(
+                backgroundColor: const Color(0xff62e6df),
+                foregroundColor: Colors.black,
+              ),
+              child: const Text('Try on'),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
-    );
-  }
+    ),
+  );
 }

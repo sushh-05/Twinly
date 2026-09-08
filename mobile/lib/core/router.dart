@@ -5,12 +5,14 @@ import '../features/account/screen.dart';
 import '../features/onboarding/screen.dart';
 import '../features/avatar/screen.dart';
 import '../features/catalog/screen.dart';
+import '../features/catalog/detail_screen.dart';
 import '../features/fitting/screen.dart';
 import '../features/styling/screen.dart';
 import '../features/saved_looks/screen.dart';
 import '../features/paywall/screen.dart';
 import '../features/saved_looks/detail_screen.dart';
 import '../core/providers/saved_avatars_state.dart';
+import '../models/garment.dart';
 
 GoRouter createRouter({required String initialLocation}) {
   return GoRouter(
@@ -44,6 +46,11 @@ GoRouter createRouter({required String initialLocation}) {
                 path: '/catalog',
                 builder: (context, state) => const CatalogScreen(),
                 routes: [
+                  GoRoute(
+                    path: 'detail',
+                    builder: (context, state) =>
+                        DressDetailScreen(garment: state.extra! as Garment),
+                  ),
                   GoRoute(
                     path: 'styling',
                     builder: (context, state) => const StylingScreen(),
@@ -105,6 +112,12 @@ class ScaffoldWithNavBar extends StatelessWidget {
     return Scaffold(
       body: navigationShell,
       bottomNavigationBar: NavigationBar(
+        backgroundColor: const Color(0xFF1B1B1B),
+        indicatorColor: const Color(0xFF58D9D5),
+        surfaceTintColor: Colors.transparent,
+        labelTextStyle: const WidgetStatePropertyAll(
+          TextStyle(color: Colors.white),
+        ),
         selectedIndex: navigationShell.currentIndex,
         onDestinationSelected: (index) {
           navigationShell.goBranch(
@@ -114,22 +127,22 @@ class ScaffoldWithNavBar extends StatelessWidget {
         },
         destinations: const [
           NavigationDestination(
-            icon: Icon(Icons.accessibility_new_outlined),
+            icon: Icon(Icons.accessibility_new_outlined, color: Colors.white60),
             selectedIcon: Icon(Icons.accessibility_new),
             label: 'Avatar',
           ),
           NavigationDestination(
-            icon: Icon(Icons.checkroom_outlined),
+            icon: Icon(Icons.checkroom_outlined, color: Colors.white60),
             selectedIcon: Icon(Icons.checkroom),
             label: 'Catalog',
           ),
           NavigationDestination(
-            icon: Icon(Icons.checklist_outlined),
+            icon: Icon(Icons.checklist_outlined, color: Colors.white60),
             selectedIcon: Icon(Icons.checklist),
             label: 'Fitting',
           ),
           NavigationDestination(
-            icon: Icon(Icons.person_outline),
+            icon: Icon(Icons.person_outline, color: Colors.white60),
             selectedIcon: Icon(Icons.person),
             label: 'Account',
           ),

@@ -36,7 +36,7 @@ def test_negative_ease_is_tight():
     garment = get_garment_by_id("dress_001")
     report = build_fit_report(
         garment,
-        {"bust": 100, "waist": 70, "hip": 96},
+        {"bust": 110, "waist": 70, "hip": 96},
         "regular",
     )
     assert report["regions"]["bust"]["label"] == "tight"

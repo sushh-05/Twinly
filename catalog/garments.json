@@ -35,11 +35,20 @@
                 "bustCm": 98,
                 "waistCm": 82,
                 "hipCm": 106
+            },
+            "XL": {
+                "bustCm": 104,
+                "waistCm": 88,
+                "hipCm": 112
             }
         },
         "stretch": "medium",
         "sizeChartVerified": true,
         "sizeChartSource": "demo_verified",
+        "brand": "Twinly Edit",
+        "currencySymbol": "₹",
+        "assetImagePath": "assets/dresses/black-dress-1.jpg",
+        "verifiedSizeChart": true,
         "merchant": "Demo Store",
         "purchaseUrl": "https://example.com/product/dress_001"
     },

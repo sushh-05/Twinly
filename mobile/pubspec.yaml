@@ -42,3 +42,4 @@ flutter:
   # Asset Directories for 3D Models
   assets:
     - assets/models/
+    - assets/dresses/

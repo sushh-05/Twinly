@@ -52,6 +52,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color(0xFF121212),
       appBar: AppBar(
         title: const Text(
           'Twinly',
@@ -165,10 +166,10 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
         decoration: BoxDecoration(
-          color: isSelected ? Colors.pink.shade50 : Colors.white,
+          color: isSelected ? const Color(0xFF243A3A) : const Color(0xFF202020),
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: isSelected ? Colors.pink.shade400 : Colors.grey.shade300,
+            color: isSelected ? const Color(0xFF58D9D5) : Colors.white24,
             width: isSelected ? 3 : 1.5,
           ),
           boxShadow: [
