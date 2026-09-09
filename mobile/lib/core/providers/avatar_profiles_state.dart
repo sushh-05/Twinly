@@ -1,4 +1,5 @@
 import 'dart:convert';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -164,6 +165,9 @@ class AvatarProfile {
       'waist': measurements.waist,
       'hip': measurements.hip,
       'inseam': measurements.inseam,
+      'skinTone': measurements.skinTone,
+      'hairStyle': measurements.hairStyle,
+      'hairColor': measurements.hairColor,
     };
   }
 
@@ -182,6 +186,9 @@ class AvatarProfile {
         hip: (json['hip'] as num?)?.toDouble() ?? (isFem ? 95 : 95),
         inseam: (json['inseam'] as num?)?.toDouble() ?? (isFem ? 74 : 79),
         isFeminine: isFem,
+        skinTone: json['skinTone'] as String? ?? 'medium',
+        hairStyle: json['hairStyle'] as String? ?? 'short',
+        hairColor: json['hairColor'] as String? ?? 'black',
       ),
     );
   }
@@ -258,8 +265,8 @@ class AvatarProfilesNotifier extends Notifier<AvatarProfilesState> {
             .toList();
 
         if (loadedProfiles.isNotEmpty) {
-          final targetActiveId = activeId != null &&
-                  loadedProfiles.any((p) => p.id == activeId)
+          final targetActiveId =
+              activeId != null && loadedProfiles.any((p) => p.id == activeId)
               ? activeId
               : loadedProfiles.first.id;
 
@@ -271,11 +278,9 @@ class AvatarProfilesNotifier extends Notifier<AvatarProfilesState> {
           // Update active avatar measurements
           final active = state.activeProfile;
           if (active != null) {
-            ref.read(avatarMeasurementsProvider.notifier).setHeight(active.measurements.height);
-            ref.read(avatarMeasurementsProvider.notifier).setChest(active.measurements.chest);
-            ref.read(avatarMeasurementsProvider.notifier).setWaist(active.measurements.waist);
-            ref.read(avatarMeasurementsProvider.notifier).setHip(active.measurements.hip);
-            ref.read(avatarMeasurementsProvider.notifier).setInseam(active.measurements.inseam);
+            ref
+                .read(avatarMeasurementsProvider.notifier)
+                .setMeasurements(active.measurements);
           }
         }
       }
@@ -287,7 +292,9 @@ class AvatarProfilesNotifier extends Notifier<AvatarProfilesState> {
   Future<void> _persist() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      final jsonStr = jsonEncode(state.profiles.map((p) => p.toJson()).toList());
+      final jsonStr = jsonEncode(
+        state.profiles.map((p) => p.toJson()).toList(),
+      );
       await prefs.setString(_keyProfiles, jsonStr);
       await prefs.setString(_keyActiveId, state.activeProfileId);
     } catch (e) {
@@ -301,7 +308,10 @@ class AvatarProfilesNotifier extends Notifier<AvatarProfilesState> {
     required bool isFeminine,
     required String sizePreset,
   }) async {
-    final measurements = AvatarSizePresets.getMeasurements(isFeminine, sizePreset);
+    final measurements = AvatarSizePresets.getMeasurements(
+      isFeminine,
+      sizePreset,
+    );
     final primaryProfile = AvatarProfile(
       id: 'profile_${DateTime.now().millisecondsSinceEpoch}',
       name: name.isEmpty ? 'Me' : name,
@@ -317,12 +327,7 @@ class AvatarProfilesNotifier extends Notifier<AvatarProfilesState> {
     );
 
     // Apply to avatar state
-    ref.read(avatarMeasurementsProvider.notifier).setGender(isFeminine);
-    ref.read(avatarMeasurementsProvider.notifier).setHeight(measurements.height);
-    ref.read(avatarMeasurementsProvider.notifier).setChest(measurements.chest);
-    ref.read(avatarMeasurementsProvider.notifier).setWaist(measurements.waist);
-    ref.read(avatarMeasurementsProvider.notifier).setHip(measurements.hip);
-    ref.read(avatarMeasurementsProvider.notifier).setInseam(measurements.inseam);
+    ref.read(avatarMeasurementsProvider.notifier).setMeasurements(measurements);
 
     await _persist();
   }
@@ -335,7 +340,8 @@ class AvatarProfilesNotifier extends Notifier<AvatarProfilesState> {
     required String sizePreset,
     AvatarMeasurements? customMeasurements,
   }) async {
-    final measurements = customMeasurements ??
+    final measurements =
+        customMeasurements ??
         AvatarSizePresets.getMeasurements(isFeminine, sizePreset);
 
     final newProfile = AvatarProfile(
@@ -353,12 +359,7 @@ class AvatarProfilesNotifier extends Notifier<AvatarProfilesState> {
     );
 
     // Switch avatar state
-    ref.read(avatarMeasurementsProvider.notifier).setGender(isFeminine);
-    ref.read(avatarMeasurementsProvider.notifier).setHeight(measurements.height);
-    ref.read(avatarMeasurementsProvider.notifier).setChest(measurements.chest);
-    ref.read(avatarMeasurementsProvider.notifier).setWaist(measurements.waist);
-    ref.read(avatarMeasurementsProvider.notifier).setHip(measurements.hip);
-    ref.read(avatarMeasurementsProvider.notifier).setInseam(measurements.inseam);
+    ref.read(avatarMeasurementsProvider.notifier).setMeasurements(measurements);
 
     await _persist();
   }
@@ -375,12 +376,9 @@ class AvatarProfilesNotifier extends Notifier<AvatarProfilesState> {
     state = state.copyWith(activeProfileId: target.id);
 
     // Update avatar measurements to match this person
-    ref.read(avatarMeasurementsProvider.notifier).setGender(target.isFeminine);
-    ref.read(avatarMeasurementsProvider.notifier).setHeight(target.measurements.height);
-    ref.read(avatarMeasurementsProvider.notifier).setChest(target.measurements.chest);
-    ref.read(avatarMeasurementsProvider.notifier).setWaist(target.measurements.waist);
-    ref.read(avatarMeasurementsProvider.notifier).setHip(target.measurements.hip);
-    ref.read(avatarMeasurementsProvider.notifier).setInseam(target.measurements.inseam);
+    ref
+        .read(avatarMeasurementsProvider.notifier)
+        .setMeasurements(target.measurements);
 
     await _persist();
   }
@@ -415,12 +413,9 @@ class AvatarProfilesNotifier extends Notifier<AvatarProfilesState> {
 
     if (state.activeProfile != null) {
       final active = state.activeProfile!;
-      ref.read(avatarMeasurementsProvider.notifier).setGender(active.isFeminine);
-      ref.read(avatarMeasurementsProvider.notifier).setHeight(active.measurements.height);
-      ref.read(avatarMeasurementsProvider.notifier).setChest(active.measurements.chest);
-      ref.read(avatarMeasurementsProvider.notifier).setWaist(active.measurements.waist);
-      ref.read(avatarMeasurementsProvider.notifier).setHip(active.measurements.hip);
-      ref.read(avatarMeasurementsProvider.notifier).setInseam(active.measurements.inseam);
+      ref
+          .read(avatarMeasurementsProvider.notifier)
+          .setMeasurements(active.measurements);
     }
 
     await _persist();
@@ -429,5 +424,5 @@ class AvatarProfilesNotifier extends Notifier<AvatarProfilesState> {
 
 final avatarProfilesProvider =
     NotifierProvider<AvatarProfilesNotifier, AvatarProfilesState>(
-  AvatarProfilesNotifier.new,
-);
+      AvatarProfilesNotifier.new,
+    );

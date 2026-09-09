@@ -45,7 +45,10 @@ class _FittingScreenState extends ConsumerState<FittingScreen> {
         backgroundColor: bgColor,
         appBar: AppBar(
           backgroundColor: bgColor,
-          title: Text('Fitting', style: TextStyle(color: textPrimary, fontWeight: FontWeight.bold)),
+          title: Text(
+            'Fitting',
+            style: TextStyle(color: textPrimary, fontWeight: FontWeight.bold),
+          ),
         ),
         body: Center(
           child: Column(
@@ -55,7 +58,11 @@ class _FittingScreenState extends ConsumerState<FittingScreen> {
               const SizedBox(height: 16),
               Text(
                 'No dress selected yet',
-                style: TextStyle(color: textPrimary, fontSize: 18, fontWeight: FontWeight.bold),
+                style: TextStyle(
+                  color: textPrimary,
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               const SizedBox(height: 6),
               Text(
@@ -68,9 +75,14 @@ class _FittingScreenState extends ConsumerState<FittingScreen> {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.teal.shade400,
                   foregroundColor: Colors.black,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20),
+                  ),
                 ),
-                child: const Text('Go to Catalog', style: TextStyle(fontWeight: FontWeight.bold)),
+                child: const Text(
+                  'Go to Catalog',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
               ),
             ],
           ),
@@ -78,7 +90,8 @@ class _FittingScreenState extends ConsumerState<FittingScreen> {
       );
     }
 
-    final atFreeLimit = !isPremium && usage.triesUsed >= UsageLimits.freeTriesLimit;
+    final atFreeLimit =
+        !isPremium && usage.triesUsed >= UsageLimits.freeTriesLimit;
     final isNewGarment = garment.id != usage.lastCountedGarmentId;
 
     if (atFreeLimit && isNewGarment) {
@@ -98,7 +111,11 @@ class _FittingScreenState extends ConsumerState<FittingScreen> {
                 const SizedBox(height: 16),
                 Text(
                   "You've used your ${UsageLimits.freeTriesLimit} free try-ons",
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: textPrimary),
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: textPrimary,
+                  ),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 8),
@@ -113,10 +130,18 @@ class _FittingScreenState extends ConsumerState<FittingScreen> {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF2563EB),
                     foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-                    padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(24),
+                    ),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 32,
+                      vertical: 12,
+                    ),
                   ),
-                  child: const Text('Upgrade to Premium', style: TextStyle(fontWeight: FontWeight.bold)),
+                  child: const Text(
+                    'Upgrade to Premium',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
                 ),
               ],
             ),
@@ -128,7 +153,9 @@ class _FittingScreenState extends ConsumerState<FittingScreen> {
     if (_registeredForGarmentId != garment.id) {
       _registeredForGarmentId = garment.id;
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        ref.read(usageLimitsProvider.notifier).registerTryIfNew(garment.id, isPremium: isPremium);
+        ref
+            .read(usageLimitsProvider.notifier)
+            .registerTryIfNew(garment.id, isPremium: isPremium);
       });
     }
 
@@ -147,7 +174,11 @@ class _FittingScreenState extends ConsumerState<FittingScreen> {
         ),
         title: Text(
           'Fitting',
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 19, color: textPrimary),
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 19,
+            color: textPrimary,
+          ),
         ),
         actions: [
           // Toggle between dress catalog portrait & 2D custom avatar view
@@ -160,7 +191,11 @@ class _FittingScreenState extends ConsumerState<FittingScreen> {
             ),
             label: Text(
               _showDressPhoto ? 'Avatar' : 'Dress',
-              style: TextStyle(color: Colors.teal.shade400, fontWeight: FontWeight.bold, fontSize: 12),
+              style: TextStyle(
+                color: Colors.teal.shade400,
+                fontWeight: FontWeight.bold,
+                fontSize: 12,
+              ),
             ),
           ),
         ],
@@ -180,11 +215,18 @@ class _FittingScreenState extends ConsumerState<FittingScreen> {
                         onTap: () => showAvatarProfileSheet(context, ref),
                         borderRadius: BorderRadius.circular(14),
                         child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 14,
+                            vertical: 8,
+                          ),
                           decoration: BoxDecoration(
-                            color: isDark ? const Color(0xFF182828) : Colors.teal.shade50.withValues(alpha: 0.7),
+                            color: isDark
+                                ? const Color(0xFF182828)
+                                : Colors.teal.shade50.withValues(alpha: 0.7),
                             borderRadius: BorderRadius.circular(14),
-                            border: Border.all(color: Colors.teal.withValues(alpha: 0.3)),
+                            border: Border.all(
+                              color: Colors.teal.withValues(alpha: 0.3),
+                            ),
                           ),
                           child: Row(
                             children: [
@@ -192,7 +234,9 @@ class _FittingScreenState extends ConsumerState<FittingScreen> {
                                 radius: 11,
                                 backgroundColor: Colors.teal,
                                 child: Icon(
-                                  measurements.isFeminine ? Icons.female : Icons.male,
+                                  measurements.isFeminine
+                                      ? Icons.female
+                                      : Icons.male,
                                   size: 13,
                                   color: Colors.white,
                                 ),
@@ -204,13 +248,19 @@ class _FittingScreenState extends ConsumerState<FittingScreen> {
                                   style: TextStyle(
                                     fontSize: 13,
                                     fontWeight: FontWeight.bold,
-                                    color: isDark ? Colors.teal.shade200 : Colors.teal.shade900,
+                                    color: isDark
+                                        ? Colors.teal.shade200
+                                        : Colors.teal.shade900,
                                   ),
                                   overflow: TextOverflow.ellipsis,
                                 ),
                               ),
                               const SizedBox(width: 4),
-                              Icon(Icons.arrow_drop_down, color: Colors.teal.shade400, size: 20),
+                              Icon(
+                                Icons.arrow_drop_down,
+                                color: Colors.teal.shade400,
+                                size: 20,
+                              ),
                             ],
                           ),
                         ),
@@ -237,11 +287,15 @@ class _FittingScreenState extends ConsumerState<FittingScreen> {
                     color: cardBg,
                     borderRadius: BorderRadius.circular(16),
                     border: Border.all(
-                      color: isDark ? Colors.white10 : Colors.black.withValues(alpha: 0.08),
+                      color: isDark
+                          ? Colors.white10
+                          : Colors.black.withValues(alpha: 0.08),
                     ),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withValues(alpha: isDark ? 0.4 : 0.06),
+                        color: Colors.black.withValues(
+                          alpha: isDark ? 0.4 : 0.06,
+                        ),
                         blurRadius: 10,
                         offset: const Offset(0, 3),
                       ),
@@ -262,6 +316,10 @@ class _FittingScreenState extends ConsumerState<FittingScreen> {
                                 hip: measurements.hip,
                                 inseam: measurements.inseam,
                                 isSideView: false,
+                                isFeminine: measurements.isFeminine,
+                                skinTone: measurements.skinTone,
+                                hairStyle: measurements.hairStyle,
+                                hairColor: measurements.hairColor,
                               ),
                             ),
                             Positioned(
@@ -272,7 +330,10 @@ class _FittingScreenState extends ConsumerState<FittingScreen> {
                                 decoration: BoxDecoration(
                                   color: Colors.teal.withValues(alpha: 0.45),
                                   borderRadius: BorderRadius.circular(10),
-                                  border: Border.all(color: Colors.teal, width: 1.5),
+                                  border: Border.all(
+                                    color: Colors.teal,
+                                    width: 1.5,
+                                  ),
                                 ),
                               ),
                             ),
@@ -281,6 +342,18 @@ class _FittingScreenState extends ConsumerState<FittingScreen> {
                 ),
               ),
               const SizedBox(height: 16),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Text(
+                  'Avatar style preview, not AI photo try-on.',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: textSecondary,
+                    fontStyle: FontStyle.italic,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 10),
 
               // Fit Estimate Card
               Container(
@@ -290,7 +363,9 @@ class _FittingScreenState extends ConsumerState<FittingScreen> {
                   color: cardBg,
                   borderRadius: BorderRadius.circular(16),
                   border: Border.all(
-                    color: isDark ? Colors.white10 : Colors.black.withValues(alpha: 0.08),
+                    color: isDark
+                        ? Colors.white10
+                        : Colors.black.withValues(alpha: 0.08),
                   ),
                 ),
                 child: Column(
@@ -317,11 +392,17 @@ class _FittingScreenState extends ConsumerState<FittingScreen> {
                         ),
                         const SizedBox(width: 10),
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 3,
+                          ),
                           decoration: BoxDecoration(
                             color: Colors.amber.shade400.withValues(alpha: 0.2),
                             borderRadius: BorderRadius.circular(6),
-                            border: Border.all(color: Colors.amber.shade600, width: 0.8),
+                            border: Border.all(
+                              color: Colors.amber.shade600,
+                              width: 0.8,
+                            ),
                           ),
                           child: Text(
                             'Confidence: Medium',
@@ -337,7 +418,11 @@ class _FittingScreenState extends ConsumerState<FittingScreen> {
                     const SizedBox(height: 6),
                     Text(
                       'Based on your measurements, your fit preference (${_preferredFit.substring(0, 1).toUpperCase()}${_preferredFit.substring(1)}), and this dress\'s verified size chart.',
-                      style: TextStyle(fontSize: 12.5, color: textSecondary, height: 1.3),
+                      style: TextStyle(
+                        fontSize: 12.5,
+                        color: textSecondary,
+                        height: 1.3,
+                      ),
                     ),
                     const SizedBox(height: 16),
 
@@ -378,7 +463,9 @@ class _FittingScreenState extends ConsumerState<FittingScreen> {
                     Container(
                       padding: const EdgeInsets.all(14),
                       decoration: BoxDecoration(
-                        color: isDark ? const Color(0xFF222226) : const Color(0xFFF3F4F6),
+                        color: isDark
+                            ? const Color(0xFF222226)
+                            : const Color(0xFFF3F4F6),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Column(
@@ -395,7 +482,11 @@ class _FittingScreenState extends ConsumerState<FittingScreen> {
                           const SizedBox(height: 6),
                           Text(
                             'Your waist is ${measurements.waist.round()} cm. Size M supports up to 75 cm. Size $recommendedSize includes ${measurements.waist.round()} cm and better matches your ${_preferredFit.substring(0, 1).toUpperCase()}${_preferredFit.substring(1)} fit preference.',
-                            style: TextStyle(fontSize: 12.5, color: textSecondary, height: 1.35),
+                            style: TextStyle(
+                              fontSize: 12.5,
+                              color: textSecondary,
+                              height: 1.35,
+                            ),
                           ),
                           const SizedBox(height: 8),
                           Text(
@@ -425,11 +516,16 @@ class _FittingScreenState extends ConsumerState<FittingScreen> {
                     style: ElevatedButton.styleFrom(
                       backgroundColor: isDark ? Colors.white : Colors.black87,
                       foregroundColor: isDark ? Colors.black : Colors.white,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(24),
+                      ),
                     ),
                     child: const Text(
                       'Try another size / fit preference',
-                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14,
+                      ),
                     ),
                   ),
                 ),
@@ -448,13 +544,20 @@ class _FittingScreenState extends ConsumerState<FittingScreen> {
                           onPressed: () => context.go('/avatar'),
                           style: OutlinedButton.styleFrom(
                             side: BorderSide(
-                              color: isDark ? Colors.white24 : Colors.grey.shade400,
+                              color: isDark
+                                  ? Colors.white24
+                                  : Colors.grey.shade400,
                             ),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(24),
+                            ),
                           ),
                           child: Text(
                             'Edit avatar',
-                            style: TextStyle(color: textPrimary, fontWeight: FontWeight.w600),
+                            style: TextStyle(
+                              color: textPrimary,
+                              fontWeight: FontWeight.w600,
+                            ),
                           ),
                         ),
                       ),
@@ -476,7 +579,9 @@ class _FittingScreenState extends ConsumerState<FittingScreen> {
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.teal.shade500,
                             foregroundColor: Colors.white,
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(24),
+                            ),
                           ),
                           child: const Text(
                             'Save look',
@@ -498,12 +603,13 @@ class _FittingScreenState extends ConsumerState<FittingScreen> {
                   height: 48,
                   child: TextButton(
                     onPressed: () => context.go('/catalog'),
-                    style: TextButton.styleFrom(
-                      foregroundColor: textSecondary,
-                    ),
+                    style: TextButton.styleFrom(foregroundColor: textSecondary),
                     child: const Text(
                       'Back to catalog',
-                      style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                      ),
                     ),
                   ),
                 ),
@@ -535,10 +641,20 @@ class _FittingScreenState extends ConsumerState<FittingScreen> {
       children: [
         Icon(icon, size: 20, color: textPrimary),
         const SizedBox(width: 10),
-        Text(label, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: textPrimary)),
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w600,
+            color: textPrimary,
+          ),
+        ),
         if (sublabel != null) ...[
           const SizedBox(width: 6),
-          Text(sublabel, style: TextStyle(fontSize: 12, color: Colors.grey.shade500)),
+          Text(
+            sublabel,
+            style: TextStyle(fontSize: 12, color: Colors.grey.shade500),
+          ),
         ],
         const Spacer(),
         Container(
@@ -549,7 +665,11 @@ class _FittingScreenState extends ConsumerState<FittingScreen> {
           ),
           child: Text(
             badge,
-            style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.white),
+            style: const TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+            ),
           ),
         ),
       ],
@@ -565,7 +685,14 @@ class _FittingScreenState extends ConsumerState<FittingScreen> {
       children: [
         Icon(Icons.crop_free, size: 20, color: textPrimary),
         const SizedBox(width: 10),
-        Text('Waist', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: textPrimary)),
+        Text(
+          'Waist',
+          style: TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w600,
+            color: textPrimary,
+          ),
+        ),
         const Spacer(),
         Wrap(
           spacing: 6,
@@ -578,7 +705,11 @@ class _FittingScreenState extends ConsumerState<FittingScreen> {
               ),
               child: const Text(
                 'Likely snug in M',
-                style: TextStyle(fontSize: 10.5, fontWeight: FontWeight.bold, color: Colors.white),
+                style: TextStyle(
+                  fontSize: 10.5,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
               ),
             ),
             Container(
@@ -589,7 +720,11 @@ class _FittingScreenState extends ConsumerState<FittingScreen> {
               ),
               child: Text(
                 'Comfortable in $recommendedSize',
-                style: const TextStyle(fontSize: 10.5, fontWeight: FontWeight.bold, color: Colors.white),
+                style: const TextStyle(
+                  fontSize: 10.5,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
               ),
             ),
           ],
@@ -614,7 +749,10 @@ class _FittingScreenState extends ConsumerState<FittingScreen> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text('Select Fit Preference', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+              const Text(
+                'Select Fit Preference',
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+              ),
               const SizedBox(height: 14),
               SegmentedButton<String>(
                 segments: const [
@@ -688,12 +826,20 @@ class _FittingScreenState extends ConsumerState<FittingScreen> {
               const SizedBox(height: 16),
               Text(
                 'Save this look?',
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: textPri),
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: textPri,
+                ),
               ),
               const SizedBox(height: 10),
               Text(
                 'Dress: ${garment.name}',
-                style: TextStyle(fontSize: 14.5, color: textPri, fontWeight: FontWeight.w600),
+                style: TextStyle(
+                  fontSize: 14.5,
+                  color: textPri,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
               const SizedBox(height: 4),
               Text(
@@ -707,9 +853,12 @@ class _FittingScreenState extends ConsumerState<FittingScreen> {
                 child: ElevatedButton(
                   onPressed: () {
                     ref.read(usageLimitsProvider.notifier).registerSave();
-                    ref.read(savedAvatarsProvider.notifier).forceSave(
+                    ref
+                        .read(savedAvatarsProvider.notifier)
+                        .forceSave(
                           SavedAvatarEntry(
-                            name: '${garment.name} - Size $recommendedSize ($personName)',
+                            name:
+                                '${garment.name} - Size $recommendedSize ($personName)',
                             measurements: measurements,
                             garmentId: garment.id,
                           ),
@@ -727,9 +876,14 @@ class _FittingScreenState extends ConsumerState<FittingScreen> {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: isDark ? Colors.white : Colors.black87,
                     foregroundColor: isDark ? Colors.black : Colors.white,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(24),
+                    ),
                   ),
-                  child: const Text('Save look', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+                  child: const Text(
+                    'Save look',
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                  ),
                 ),
               ),
               const SizedBox(height: 10),
@@ -738,7 +892,10 @@ class _FittingScreenState extends ConsumerState<FittingScreen> {
                 height: 44,
                 child: TextButton(
                   onPressed: () => Navigator.pop(sheetContext),
-                  child: Text('Cancel', style: TextStyle(color: textSec, fontSize: 14)),
+                  child: Text(
+                    'Cancel',
+                    style: TextStyle(color: textSec, fontSize: 14),
+                  ),
                 ),
               ),
             ],

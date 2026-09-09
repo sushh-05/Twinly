@@ -7,6 +7,9 @@ class AvatarMeasurements {
   final double hip;
   final double inseam;
   final bool isFeminine;
+  final String skinTone;
+  final String hairStyle;
+  final String hairColor;
 
   const AvatarMeasurements({
     required this.height,
@@ -15,6 +18,9 @@ class AvatarMeasurements {
     required this.hip,
     required this.inseam,
     required this.isFeminine,
+    this.skinTone = 'medium',
+    this.hairStyle = 'short',
+    this.hairColor = 'black',
   });
 
   AvatarMeasurements copyWith({
@@ -24,6 +30,9 @@ class AvatarMeasurements {
     double? hip,
     double? inseam,
     bool? isFeminine,
+    String? skinTone,
+    String? hairStyle,
+    String? hairColor,
   }) {
     return AvatarMeasurements(
       height: height ?? this.height,
@@ -32,6 +41,9 @@ class AvatarMeasurements {
       hip: hip ?? this.hip,
       inseam: inseam ?? this.inseam,
       isFeminine: isFeminine ?? this.isFeminine,
+      skinTone: skinTone ?? this.skinTone,
+      hairStyle: hairStyle ?? this.hairStyle,
+      hairColor: hairColor ?? this.hairColor,
     );
   }
 
@@ -71,6 +83,7 @@ class AvatarMeasurementsNotifier extends Notifier<AvatarMeasurements> {
   void setWaist(double v) => state = state.copyWith(waist: v);
   void setHip(double v) => state = state.copyWith(hip: v);
   void setInseam(double v) => state = state.copyWith(inseam: v);
+  void setMeasurements(AvatarMeasurements value) => state = value;
 
   // Called from the gender toggle on the Avatar screen — resets to that
   // gender's sensible defaults, since switching gender means switching
