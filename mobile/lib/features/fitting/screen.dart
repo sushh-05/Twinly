@@ -302,50 +302,75 @@ class _FittingScreenState extends ConsumerState<FittingScreen> {
                     ],
                   ),
                   clipBehavior: Clip.antiAlias,
-                  child: _showDressPhoto
-                      ? GarmentImage(garment: garment)
-                      : Stack(
-                          alignment: Alignment.center,
-                          children: [
-                            CustomPaint(
-                              size: const Size(260, 320),
-                              painter: BodyPainter(
-                                height: measurements.height,
-                                chest: measurements.chest,
-                                waist: measurements.waist,
-                                hip: measurements.hip,
-                                inseam: measurements.inseam,
-                                isSideView: false,
-                                isFeminine: measurements.isFeminine,
-                                skinTone: measurements.skinTone,
-                                hairStyle: measurements.hairStyle,
-                                hairColor: measurements.hairColor,
-                              ),
-                            ),
-                            Positioned(
-                              top: 60,
-                              child: Container(
-                                width: 85,
-                                height: 140,
-                                decoration: BoxDecoration(
-                                  color: Colors.teal.withValues(alpha: 0.45),
-                                  borderRadius: BorderRadius.circular(10),
-                                  border: Border.all(
-                                    color: Colors.teal,
-                                    width: 1.5,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
+                  child: Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      CustomPaint(
+                        size: const Size(260, 320),
+                        painter: BodyPainter(
+                          height: measurements.height,
+                          chest: measurements.chest,
+                          waist: measurements.waist,
+                          hip: measurements.hip,
+                          inseam: measurements.inseam,
+                          isSideView: false,
+                          isFeminine: measurements.isFeminine,
+                          skinTone: measurements.skinTone,
+                          hairStyle: measurements.hairStyle,
+                          hairColor: measurements.hairColor,
                         ),
+                      ),
+                      if (_showDressPhoto)
+                        Positioned(
+                          top: 16,
+                          right: 16,
+                          child: Container(
+                            width: 86,
+                            height: 116,
+                            padding: const EdgeInsets.all(4),
+                            decoration: BoxDecoration(
+                              color: cardBg.withValues(alpha: .92),
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(color: Colors.white24),
+                            ),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(8),
+                              child: GarmentImage(garment: garment),
+                            ),
+                          ),
+                        ),
+                      Positioned(
+                        left: 16,
+                        bottom: 14,
+                        child: DecoratedBox(
+                          decoration: BoxDecoration(
+                            color: Colors.black.withValues(alpha: .48),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: const Padding(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: 9,
+                              vertical: 6,
+                            ),
+                            child: Text(
+                              'Garment preview and fit estimate',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 11,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
               const SizedBox(height: 16),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: Text(
-                  'Avatar style preview, not AI photo try-on.',
+                  'Garment preview and fit estimate. No virtual try-on is shown.',
                   style: TextStyle(
                     fontSize: 12,
                     color: textSecondary,
