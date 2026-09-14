@@ -1,0 +1,21 @@
+{
+  "expo": {
+    "name": "Twinly",
+    "slug": "twinly",
+    "scheme": "twinly",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "plugins": [
+      "expo-router",
+      "expo-image-picker",
+      "expo-asset"
+    ],
+    "android": {
+      "package": "com.twinly.app"
+    },
+    "extra": {
+      "apiUrl": "http://10.0.2.2:4000"
+    }
+  }
+}

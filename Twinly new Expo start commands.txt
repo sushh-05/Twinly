@@ -1,0 +1,24 @@
+Terminal 1 - Backend:
+
+cd C:\Users\sushm\Downloads\Projects\revenuecat-shipaton\Twinly\server
+npm run dev
+
+Terminal 2 - Frontend (Expo app):
+
+cd C:\Users\sushm\Downloads\Projects\revenuecat-shipaton\Twinly\app
+npx expo start -c
+
+
+
+Before scanning, double-check your IP hasn't changed
+
+1. powershell: ipconfig
+
+2. Check the IPv4 Address under your active Wi-Fi adapter. If it's different from what's in app\.env, update it:
+
+3. Open app\.env
+
+4. Update:
+
+      EXPO_PUBLIC_API_URL=http://[your-current-ip]:4000
+      Save, then restart Expo (Ctrl+C in Terminal 2, then npx expo start -c again)

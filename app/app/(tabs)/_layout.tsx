@@ -1,0 +1,3 @@
+import { Tabs } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
+export default function TabsLayout() { return <Tabs screenOptions={{ tabBarActiveTintColor:'#A06B5B', tabBarInactiveTintColor:'#9E9790', tabBarStyle:{height:78,paddingBottom:14,paddingTop:8,backgroundColor:'#FFF',borderTopColor:'#EEE7E1'}, headerStyle:{backgroundColor:'#F8F6F2'}, headerTitleStyle:{fontWeight:'700',color:'#242321'} }}>{[['index','Avatar','sparkles'],['catalog','Catalog','grid-outline'],['try-on','Try On','camera-outline'],['saved','Saved Looks','bookmark-outline']].map(([name,title,icon]) => <Tabs.Screen key={name} name={name} options={{ title, tabBarIcon: ({color,size}) => <Ionicons name={icon as any} size={size} color={color} /> }} />)}</Tabs>; }
