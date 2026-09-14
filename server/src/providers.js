@@ -1,5 +1,39 @@
 const axios = require('axios'); const cheerio = require('cheerio'); const { client } = require('@gradio/client');
+const Replicate = require('replicate');
+const FormData = require('form-data');
+
+const replicate = new Replicate({ auth: process.env.REPLICATE_API_TOKEN });
+
 const fallback = { category: 'dress', color: 'soft neutral', pattern: 'solid', sleeveLength: 'short', neckline: 'round', styleNotes: 'clean, everyday style' };
+
+async function uploadBufferToPublicUrl(buffer, filename) {
+  const form = new FormData();
+  form.append('reqtype', 'fileupload');
+  form.append('fileToUpload', buffer, filename);
+  const res = await axios.post('https://catbox.moe/user/api.php', form, {
+    headers: form.getHeaders()
+  });
+  return res.data; // returns the raw URL string
+}
+
+async function generateVirtualTryOnReplicate(humanImageUrl, garmentImageUrl, garmentDescription) {
+  try {
+    const output = await replicate.run(
+      "cuuupid/idm-vton:0513734a452173b8173e907e3a59d19a36266e55b48528559432bd21c7d7e985",
+      {
+        input: {
+          garm_img: garmentImageUrl,
+          human_img: humanImageUrl,
+          garment_des: garmentDescription || "a garment"
+        }
+      }
+    );
+    return output.url ? output.url() : (Array.isArray(output) ? output[0] : output);
+  } catch (e) {
+    console.error('Replicate IDM-VTON error:', e.message);
+    return null;
+  }
+}
 async function analyzeGarmentImage(imageBuffer, mimeType = 'image/jpeg') {
   // Swappable provider function: replace this Hugging Face call if a free-tier provider changes.
   if (!process.env.HUGGINGFACE_API_KEY) return fallback;
@@ -71,14 +105,33 @@ async function analyzeGarmentUrl(url) {
   return { ...analyzed, styleNotes: styleNotes.trim() };
 }
 async function generateStyleImage(prompt, humanImageBuffer, garmentImageBuffer, garment) {
-  // 1. Try IDM-VTON Space first if we have both images
+  const garmentDesc = `${garment?.color || ''} ${garment?.category || ''} ${garment?.styleNotes || ''}`.trim();
+
+  // 1. Try Replicate first if we have both images and a token
+  if (process.env.REPLICATE_API_TOKEN && humanImageBuffer && garmentImageBuffer) {
+    try {
+      console.log('Attempting Replicate IDM-VTON generation...');
+      const humanUrl = await uploadBufferToPublicUrl(humanImageBuffer, 'human.jpg');
+      const garmentUrl = await uploadBufferToPublicUrl(garmentImageBuffer, 'garment.jpg');
+
+      const resultUrl = await generateVirtualTryOnReplicate(humanUrl, garmentUrl, garmentDesc);
+      if (resultUrl) {
+        console.log('Replicate generation successful');
+        return resultUrl;
+      }
+    } catch (e) {
+      console.error('Replicate fallback error:', e.message);
+    }
+  }
+
+  // 2. Try IDM-VTON Space next
   if (humanImageBuffer && garmentImageBuffer) {
     try {
       console.log('Attempting IDM-VTON generation...');
       const hfToken = process.env.HUGGINGFACE_API_KEY;
       console.log('HF Token check - exists:', !!hfToken, 'length:', hfToken ? hfToken.length : 0, 'prefix:', hfToken ? hfToken.substring(0, 4) : 'none');
 
-      const app = await client("yisol/IDM-VTON", { hf_token: hfToken });
+      const app = await client("yisol/IDM-VTON", { token: hfToken });
 
       // Convert buffers to Blobs for Gradio client
       const humanBlob = new Blob([humanImageBuffer], { type: 'image/jpeg' });
@@ -87,9 +140,6 @@ async function generateStyleImage(prompt, humanImageBuffer, garmentImageBuffer, 
       // The human image input expects a dict with background/layers/composite. 
       // We pass the blob as both background and composite to ensure it's not malformed.
       const humanDict = { background: humanBlob, layers: [], composite: humanBlob };
-
-      // Build the garment description from the analyzed garment object
-      const garmentDesc = `${garment?.color || ''} ${garment?.category || ''} ${garment?.styleNotes || ''}`.trim();
 
       // Call the tryon endpoint with the exact 7 parameters
       // inputs: [human_dict, garment_image, garment_desc, is_checked, is_checked_crop, denoise_steps, seed]
@@ -117,7 +167,9 @@ async function generateStyleImage(prompt, humanImageBuffer, garmentImageBuffer, 
     }
   }
 
-  // 2. Fallback to Together AI
+  // 3. Together AI (Commented out)
+  /*
+  // Together AI free tier confirmed unavailable as of Sep 2026, kept for reference only
   try {
     if (process.env.TOGETHER_API_KEY) {
       console.log('Falling back to Together AI...');
@@ -127,8 +179,9 @@ async function generateStyleImage(prompt, humanImageBuffer, garmentImageBuffer, 
   } catch (e) {
     console.error('Together AI API error:', e.message, e.response?.data);
   }
+  */
 
-  // 3. Fallback to Pollinations.ai
+  // 4. Fallback to Pollinations.ai
   console.log('Falling back to Pollinations.ai for image generation');
   return `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=512&height=768&nologo=true`;
 }
