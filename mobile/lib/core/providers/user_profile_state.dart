@@ -1,4 +1,4 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class UserProfile {
@@ -13,23 +13,14 @@ class UserProfile {
   });
 }
 
-// Seeded in main.dart (before runApp) with whatever was found on disk,
-// or null on first launch. Read once by UserProfileNotifier.build().
-final initialUserProfileProvider = Provider<UserProfile?>((ref) {
-  throw UnimplementedError(
-    'initialUserProfileProvider must be overridden in main.dart before runApp',
-  );
-});
-
-class UserProfileNotifier extends Notifier<UserProfile?> {
+// Loaded in main.dart before runApp, or null on first launch.
+class UserProfileState extends ChangeNotifier {
   static const _keyName = 'user_name';
   static const _keyEmail = 'user_email';
   static const _keyIsFeminine = 'user_is_feminine';
 
-  @override
-  UserProfile? build() {
-    return ref.read(initialUserProfileProvider);
-  }
+  UserProfile? value;
+  UserProfileState([this.value]);
 
   Future<void> save({
     required String name,
@@ -40,7 +31,8 @@ class UserProfileNotifier extends Notifier<UserProfile?> {
     await prefs.setString(_keyName, name);
     await prefs.setString(_keyEmail, email);
     await prefs.setBool(_keyIsFeminine, isFeminine);
-    state = UserProfile(name: name, email: email, isFeminine: isFeminine);
+    value = UserProfile(name: name, email: email, isFeminine: isFeminine);
+    notifyListeners();
   }
 
   Future<void> clear() async {
@@ -48,7 +40,8 @@ class UserProfileNotifier extends Notifier<UserProfile?> {
     await prefs.remove(_keyName);
     await prefs.remove(_keyEmail);
     await prefs.remove(_keyIsFeminine);
-    state = null;
+    value = null;
+    notifyListeners();
   }
 
   // Called once at app startup, before runApp, to check what's on disk.
@@ -61,7 +54,3 @@ class UserProfileNotifier extends Notifier<UserProfile?> {
     return UserProfile(name: name, email: email, isFeminine: isFeminine);
   }
 }
-
-final userProfileProvider = NotifierProvider<UserProfileNotifier, UserProfile?>(
-  UserProfileNotifier.new,
-);

@@ -1,11 +1,15 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:provider/provider.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:twinly/main.dart';
+import 'package:twinly/core/providers/theme_state.dart';
 
 void main() {
   testWidgets('Twinly app smoke test', (tester) async {
     await tester.pumpWidget(
-      const ProviderScope(child: TwinlyApp(initialLocation: '/onboarding')),
+      MultiProvider(
+        providers: [ChangeNotifierProvider(create: (_) => ThemeModeState())],
+        child: const TwinlyApp(initialLocation: '/onboarding'),
+      ),
     );
 
     await tester.pump();

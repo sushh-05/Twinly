@@ -1,3 +1,48 @@
+# Twinly
+
+## Shipaton setup
+
+Prerequisites: Flutter stable, Android Studio/Android SDK, Node.js, Firebase CLI, and FlutterFire CLI.
+
+```powershell
+npm install -g firebase-tools
+firebase login
+dart pub global activate flutterfire_cli
+flutterfire configure
+```
+
+In Firebase Console, create/select the Twinly project, register Android package `com.teamsapphire.twinlyapp`, enable Authentication and Email/Password, and confirm `lib/firebase_options.dart` was generated. Never hand-edit credentials into source.
+
+In RevenueCat, create the Twinly project, add Android package `com.teamsapphire.twinlyapp`, create entitlement `premium_access`, connect the Google Play subscription product, add it to the current offering, and copy only the public Android SDK key.
+
+Development:
+
+```powershell
+flutter run --dart-define=DEMO_MODE=false --dart-define=USE_REVENUECAT=true --dart-define=RC_ANDROID_API_KEY=PUBLIC_ANDROID_SDK_KEY
+```
+
+The fashion backend URL defaults to `http://localhost:3000`. Override it with `--dart-define=API_BASE_URL=http://10.0.2.2:4000` for an Android emulator or your computer's LAN URL for a physical device.
+
+Demo UI:
+
+```powershell
+flutter run --dart-define=DEMO_MODE=true --dart-define=USE_REVENUECAT=false
+```
+
+Release (requires real Firebase configuration and a release signing key):
+
+```powershell
+flutter build appbundle --release --dart-define=DEMO_MODE=false --dart-define=USE_REVENUECAT=true --dart-define=RC_ANDROID_API_KEY=PUBLIC_ANDROID_SDK_KEY
+```
+
+Manual checklist: create an account, log out/in, reset password, restart for session persistence, load Premium packages, perform a license-test purchase, verify `premium_access`, restore purchases, test privacy/support links, and test deletion.
+
+Play Console checklist: store listing, closed testing, testers, privacy policy, Data Safety, app access instructions, subscription activation, and license testers.
+
+Account deletion TODO: once profile records, saved looks, and uploaded media exist, delete those records/media before deleting the Firebase account.
+
+Supply these values manually through `--dart-define`: `SUPPORT_EMAIL`, `PRIVACY_POLICY_URL`, and `DELETE_ACCOUNT_URL`. Do not commit keys, service-account JSON, or signing material.
+
 # fit_style_app
 
 A new Flutter project.

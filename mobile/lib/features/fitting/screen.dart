@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/providers/avatar_profiles_state.dart';
@@ -11,26 +11,27 @@ import '../../models/garment.dart';
 import '../../widgets/avatar_profile_sheet.dart';
 import '../../widgets/garment_image.dart';
 import '../avatar/body_painter.dart';
+import '../../services/revenuecat_service.dart';
 
-class FittingScreen extends ConsumerStatefulWidget {
+class FittingScreen extends StatefulWidget {
   const FittingScreen({super.key});
 
   @override
-  ConsumerState<FittingScreen> createState() => _FittingScreenState();
+  State<FittingScreen> createState() => _FittingScreenState();
 }
 
-class _FittingScreenState extends ConsumerState<FittingScreen> {
+class _FittingScreenState extends State<FittingScreen> {
   String? _registeredForGarmentId;
   String _preferredFit = 'regular';
   bool _showDressPhoto = true;
 
   @override
   Widget build(BuildContext context) {
-    final garment = ref.watch(selectedGarmentProvider);
-    final measurements = ref.watch(avatarMeasurementsProvider);
-    final usage = ref.watch(usageLimitsProvider);
-    final isPremium = ref.watch(isPremiumProvider);
-    final profilesState = ref.watch(avatarProfilesProvider);
+    final garment = context.watch<SelectedGarmentState>().value;
+    final measurements = context.watch<AvatarMeasurementsState>().value;
+    final usage = context.watch<UsageLimitsState>().state;
+    final isPremium = context.watch<RevenueCatService>().isPremium;
+    final profilesState = context.watch<AvatarProfilesState>();
     final activeProfile = profilesState.activeProfile;
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
@@ -153,9 +154,10 @@ class _FittingScreenState extends ConsumerState<FittingScreen> {
     if (_registeredForGarmentId != garment.id) {
       _registeredForGarmentId = garment.id;
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        ref
-            .read(usageLimitsProvider.notifier)
-            .registerTryIfNew(garment.id, isPremium: isPremium);
+        context.read<UsageLimitsState>().registerTryIfNew(
+          garment.id,
+          isPremium: isPremium,
+        );
       });
     }
 
@@ -212,7 +214,7 @@ class _FittingScreenState extends ConsumerState<FittingScreen> {
                   children: [
                     Expanded(
                       child: InkWell(
-                        onTap: () => showAvatarProfileSheet(context, ref),
+                        onTap: () => showAvatarProfileSheet(context),
                         borderRadius: BorderRadius.circular(14),
                         child: Container(
                           padding: const EdgeInsets.symmetric(
@@ -271,7 +273,7 @@ class _FittingScreenState extends ConsumerState<FittingScreen> {
                       icon: const Icon(Icons.person_add_alt_1_outlined),
                       tooltip: 'Add new person',
                       color: Colors.teal.shade400,
-                      onPressed: () => showAvatarProfileSheet(context, ref),
+                      onPressed: () => showAvatarProfileSheet(context),
                     ),
                   ],
                 ),
@@ -594,7 +596,6 @@ class _FittingScreenState extends ConsumerState<FittingScreen> {
                         child: ElevatedButton(
                           onPressed: () => _onSaveLookPressed(
                             context,
-                            ref,
                             garment,
                             measurements,
                             recommendedSize,
@@ -803,7 +804,6 @@ class _FittingScreenState extends ConsumerState<FittingScreen> {
 
   void _onSaveLookPressed(
     BuildContext context,
-    WidgetRef ref,
     Garment garment,
     AvatarMeasurements measurements,
     String recommendedSize,
@@ -815,7 +815,7 @@ class _FittingScreenState extends ConsumerState<FittingScreen> {
       return;
     }
 
-    final activeProfile = ref.read(avatarProfilesProvider).activeProfile;
+    final activeProfile = context.read<AvatarProfilesState>().activeProfile;
     final personName = activeProfile?.name ?? 'Me';
 
     // Show "Save this look?" Modal Bottom Sheet matching Image 3
@@ -877,17 +877,15 @@ class _FittingScreenState extends ConsumerState<FittingScreen> {
                 height: 48,
                 child: ElevatedButton(
                   onPressed: () {
-                    ref.read(usageLimitsProvider.notifier).registerSave();
-                    ref
-                        .read(savedAvatarsProvider.notifier)
-                        .forceSave(
-                          SavedAvatarEntry(
-                            name:
-                                '${garment.name} - Size $recommendedSize ($personName)',
-                            measurements: measurements,
-                            garmentId: garment.id,
-                          ),
-                        );
+                    context.read<UsageLimitsState>().registerSave();
+                    context.read<SavedAvatarsState>().forceSave(
+                      SavedAvatarEntry(
+                        name:
+                            '${garment.name} - Size $recommendedSize ($personName)',
+                        measurements: measurements,
+                        garmentId: garment.id,
+                      ),
+                    );
                     Navigator.pop(sheetContext);
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(

@@ -1,7 +1,6 @@
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'avatar_state.dart';
@@ -161,6 +160,7 @@ class AvatarProfile {
       'isFeminine': isFeminine,
       'sizePreset': sizePreset,
       'height': measurements.height,
+      'shoulderWidth': measurements.shoulderWidth,
       'chest': measurements.chest,
       'waist': measurements.waist,
       'hip': measurements.hip,
@@ -181,6 +181,7 @@ class AvatarProfile {
       sizePreset: json['sizePreset'] as String? ?? 'M',
       measurements: AvatarMeasurements(
         height: (json['height'] as num?)?.toDouble() ?? (isFem ? 162 : 175),
+        shoulderWidth: (json['shoulderWidth'] as num?)?.toDouble() ?? 40,
         chest: (json['chest'] as num?)?.toDouble() ?? (isFem ? 90 : 100),
         waist: (json['waist'] as num?)?.toDouble() ?? (isFem ? 75 : 85),
         hip: (json['hip'] as num?)?.toDouble() ?? (isFem ? 95 : 95),
@@ -195,11 +196,11 @@ class AvatarProfile {
 }
 
 /// State holder for multiple avatar profiles
-class AvatarProfilesState {
+class AvatarProfilesData {
   final List<AvatarProfile> profiles;
   final String activeProfileId;
 
-  const AvatarProfilesState({
+  const AvatarProfilesData({
     required this.profiles,
     required this.activeProfileId,
   });
@@ -212,23 +213,55 @@ class AvatarProfilesState {
     }
   }
 
-  AvatarProfilesState copyWith({
+  AvatarProfilesData copyWith({
     List<AvatarProfile>? profiles,
     String? activeProfileId,
   }) {
-    return AvatarProfilesState(
+    return AvatarProfilesData(
       profiles: profiles ?? this.profiles,
       activeProfileId: activeProfileId ?? this.activeProfileId,
     );
   }
 }
 
-class AvatarProfilesNotifier extends Notifier<AvatarProfilesState> {
+class AvatarProfilesState extends ChangeNotifier {
   static const _keyProfiles = 'twinly_saved_profiles_json';
   static const _keyActiveId = 'twinly_active_profile_id';
 
-  @override
-  AvatarProfilesState build() {
+  AvatarProfilesData value;
+  final AvatarMeasurementsState measurementsState;
+  AvatarProfilesState(this.measurementsState)
+    : value = const AvatarProfilesData(
+        profiles: [
+          AvatarProfile(
+            id: 'default_me',
+            name: 'Me',
+            isFeminine: true,
+            sizePreset: 'M',
+            measurements: AvatarMeasurements(
+              height: 165,
+              chest: 90,
+              waist: 72,
+              hip: 96,
+              inseam: 74,
+              isFeminine: true,
+            ),
+          ),
+        ],
+        activeProfileId: 'default_me',
+      ) {
+    _loadFromDisk();
+  }
+  AvatarProfilesData get state => value;
+  List<AvatarProfile> get profiles => value.profiles;
+  String get activeProfileId => value.activeProfileId;
+  AvatarProfile? get activeProfile => value.activeProfile;
+  void _set(AvatarProfilesData next) {
+    value = next;
+    notifyListeners();
+  }
+
+  AvatarProfilesData build() {
     _loadFromDisk();
     // Default initial profile
     const defaultProfile = AvatarProfile(
@@ -246,7 +279,7 @@ class AvatarProfilesNotifier extends Notifier<AvatarProfilesState> {
         isFeminine: true,
       ),
     );
-    return const AvatarProfilesState(
+    return const AvatarProfilesData(
       profiles: [defaultProfile],
       activeProfileId: 'default_me',
     );
@@ -270,17 +303,17 @@ class AvatarProfilesNotifier extends Notifier<AvatarProfilesState> {
               ? activeId
               : loadedProfiles.first.id;
 
-          state = AvatarProfilesState(
-            profiles: loadedProfiles,
-            activeProfileId: targetActiveId,
+          _set(
+            AvatarProfilesData(
+              profiles: loadedProfiles,
+              activeProfileId: targetActiveId,
+            ),
           );
 
           // Update active avatar measurements
           final active = state.activeProfile;
           if (active != null) {
-            ref
-                .read(avatarMeasurementsProvider.notifier)
-                .setMeasurements(active.measurements);
+            measurementsState.setMeasurements(active.measurements);
           }
         }
       }
@@ -321,13 +354,15 @@ class AvatarProfilesNotifier extends Notifier<AvatarProfilesState> {
       measurements: measurements,
     );
 
-    state = AvatarProfilesState(
-      profiles: [primaryProfile],
-      activeProfileId: primaryProfile.id,
+    _set(
+      AvatarProfilesData(
+        profiles: [primaryProfile],
+        activeProfileId: primaryProfile.id,
+      ),
     );
 
     // Apply to avatar state
-    ref.read(avatarMeasurementsProvider.notifier).setMeasurements(measurements);
+    measurementsState.setMeasurements(measurements);
 
     await _persist();
   }
@@ -353,13 +388,15 @@ class AvatarProfilesNotifier extends Notifier<AvatarProfilesState> {
       measurements: measurements,
     );
 
-    state = state.copyWith(
-      profiles: [...state.profiles, newProfile],
-      activeProfileId: newProfile.id,
+    _set(
+      state.copyWith(
+        profiles: [...state.profiles, newProfile],
+        activeProfileId: newProfile.id,
+      ),
     );
 
     // Switch avatar state
-    ref.read(avatarMeasurementsProvider.notifier).setMeasurements(measurements);
+    measurementsState.setMeasurements(measurements);
 
     await _persist();
   }
@@ -373,12 +410,10 @@ class AvatarProfilesNotifier extends Notifier<AvatarProfilesState> {
       orElse: () => state.profiles.first,
     );
 
-    state = state.copyWith(activeProfileId: target.id);
+    _set(state.copyWith(activeProfileId: target.id));
 
     // Update avatar measurements to match this person
-    ref
-        .read(avatarMeasurementsProvider.notifier)
-        .setMeasurements(target.measurements);
+    measurementsState.setMeasurements(target.measurements);
 
     await _persist();
   }
@@ -393,7 +428,7 @@ class AvatarProfilesNotifier extends Notifier<AvatarProfilesState> {
         .map((p) => p.id == active.id ? updated : p)
         .toList();
 
-    state = state.copyWith(profiles: updatedList);
+    _set(state.copyWith(profiles: updatedList));
     await _persist();
   }
 
@@ -406,23 +441,13 @@ class AvatarProfilesNotifier extends Notifier<AvatarProfilesState> {
         ? remaining.first.id
         : state.activeProfileId;
 
-    state = AvatarProfilesState(
-      profiles: remaining,
-      activeProfileId: newActiveId,
-    );
+    _set(AvatarProfilesData(profiles: remaining, activeProfileId: newActiveId));
 
     if (state.activeProfile != null) {
       final active = state.activeProfile!;
-      ref
-          .read(avatarMeasurementsProvider.notifier)
-          .setMeasurements(active.measurements);
+      measurementsState.setMeasurements(active.measurements);
     }
 
     await _persist();
   }
 }
-
-final avatarProfilesProvider =
-    NotifierProvider<AvatarProfilesNotifier, AvatarProfilesState>(
-      AvatarProfilesNotifier.new,
-    );

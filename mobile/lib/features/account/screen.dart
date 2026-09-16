@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/providers/avatar_profiles_state.dart';
@@ -7,31 +6,48 @@ import '../../core/providers/theme_state.dart';
 import '../../core/providers/usage_limits_state.dart';
 import '../../core/providers/user_profile_state.dart';
 import '../../widgets/avatar_profile_sheet.dart';
+import '../../config/app_config.dart';
+import '../../services/auth_service.dart';
+import '../../services/revenuecat_service.dart';
 
-class AccountScreen extends ConsumerWidget {
-  const AccountScreen({super.key});
+import 'package:provider/provider.dart';
+
+import 'package:url_launcher/url_launcher.dart';
+
+class AccountScreen extends StatelessWidget {
+  const AccountScreen({super.key, this.asSettings = false});
+
+  final bool asSettings;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final profile = ref.watch(userProfileProvider);
-    final isPremium = ref.watch(isPremiumProvider);
-    final usage = ref.watch(usageLimitsProvider);
-    final profilesState = ref.watch(avatarProfilesProvider);
+  Widget build(BuildContext context) {
+    final profile = context.watch<UserProfileState>().value;
+    final isPremium = context.watch<RevenueCatService>().isPremium;
+    final usage = context.watch<UsageLimitsState>().state;
+    final profilesState = context.watch<AvatarProfilesState>();
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     final bgColor = isDark ? Colors.black : const Color(0xFFF7F8FA);
     final cardBg = isDark ? const Color(0xFF161616) : Colors.white;
     final textPrimary = isDark ? Colors.white : const Color(0xFF111827);
     final textSecondary = isDark ? Colors.white70 : const Color(0xFF6B7280);
-    final buttonDarkBg = isDark ? const Color(0xFF222226) : Colors.grey.shade200;
+    final buttonDarkBg = isDark
+        ? const Color(0xFF222226)
+        : Colors.grey.shade200;
     final buttonDarkText = isDark ? Colors.white : Colors.black87;
 
     final name = profile?.name != null && profile!.name.isNotEmpty
         ? profile.name
         : 'Anushila';
 
-    final triesRemaining = (UsageLimits.freeTriesLimit - usage.triesUsed).clamp(0, UsageLimits.freeTriesLimit);
-    final savesRemaining = (UsageLimits.freeSavesLimit - usage.savesUsed).clamp(0, UsageLimits.freeSavesLimit);
+    final triesRemaining = (UsageLimits.freeTriesLimit - usage.triesUsed).clamp(
+      0,
+      UsageLimits.freeTriesLimit,
+    );
+    final savesRemaining = (UsageLimits.freeSavesLimit - usage.savesUsed).clamp(
+      0,
+      UsageLimits.freeSavesLimit,
+    );
 
     return Scaffold(
       backgroundColor: bgColor,
@@ -40,7 +56,7 @@ class AccountScreen extends ConsumerWidget {
         elevation: 0,
         scrolledUnderElevation: 0,
         title: Text(
-          'Hi, $name',
+          asSettings ? 'Settings' : 'Hi, $name',
           style: TextStyle(
             fontWeight: FontWeight.bold,
             fontSize: 24,
@@ -56,7 +72,7 @@ class AccountScreen extends ConsumerWidget {
               isDark ? Icons.light_mode_outlined : Icons.dark_mode_outlined,
               color: isDark ? Colors.amber : Colors.indigo.shade700,
             ),
-            onPressed: () => ref.read(themeModeProvider.notifier).toggle(),
+            onPressed: () => context.read<ThemeModeState>().toggle(),
           ),
         ],
       ),
@@ -72,7 +88,9 @@ class AccountScreen extends ConsumerWidget {
                 color: cardBg,
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(
-                  color: isDark ? Colors.white10 : Colors.black.withValues(alpha: 0.08),
+                  color: isDark
+                      ? Colors.white10
+                      : Colors.black.withValues(alpha: 0.08),
                 ),
               ),
               child: Row(
@@ -82,7 +100,11 @@ class AccountScreen extends ConsumerWidget {
                     backgroundColor: Colors.teal.withValues(alpha: 0.2),
                     child: Text(
                       name.isNotEmpty ? name[0].toUpperCase() : 'A',
-                      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.teal),
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.teal,
+                      ),
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -103,7 +125,10 @@ class AccountScreen extends ConsumerWidget {
                           profile?.email != null && profile!.email.isNotEmpty
                               ? profile.email
                               : 'Logged in to Twinly',
-                          style: TextStyle(fontSize: 12.5, color: textSecondary),
+                          style: TextStyle(
+                            fontSize: 12.5,
+                            color: textSecondary,
+                          ),
                         ),
                       ],
                     ),
@@ -119,7 +144,9 @@ class AccountScreen extends ConsumerWidget {
                 color: cardBg,
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(
-                  color: isDark ? Colors.white10 : Colors.black.withValues(alpha: 0.08),
+                  color: isDark
+                      ? Colors.white10
+                      : Colors.black.withValues(alpha: 0.08),
                 ),
                 boxShadow: [
                   BoxShadow(
@@ -145,14 +172,21 @@ class AccountScreen extends ConsumerWidget {
                       ),
                       if (isPremium)
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 3,
+                          ),
                           decoration: BoxDecoration(
                             color: Colors.amber.shade700,
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: const Text(
                             'PRO',
-                            style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.white),
+                            style: TextStyle(
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
                           ),
                         ),
                     ],
@@ -167,7 +201,11 @@ class AccountScreen extends ConsumerWidget {
                         isPremium
                             ? 'Unlimited try-ons'
                             : 'Try-ons remaining: $triesRemaining of ${UsageLimits.freeTriesLimit}',
-                        style: TextStyle(fontSize: 13, color: textSecondary, fontWeight: FontWeight.w500),
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: textSecondary,
+                          fontWeight: FontWeight.w500,
+                        ),
                       ),
                       Text(
                         '${usage.triesUsed} used',
@@ -179,9 +217,16 @@ class AccountScreen extends ConsumerWidget {
                   ClipRRect(
                     borderRadius: BorderRadius.circular(4),
                     child: LinearProgressIndicator(
-                      value: isPremium ? 0.2 : (usage.triesUsed / UsageLimits.freeTriesLimit).clamp(0.0, 1.0),
-                      backgroundColor: isDark ? Colors.white12 : Colors.grey.shade300,
-                      valueColor: const AlwaysStoppedAnimation<Color>(Colors.teal),
+                      value: isPremium
+                          ? 0.2
+                          : (usage.triesUsed / UsageLimits.freeTriesLimit)
+                                .clamp(0.0, 1.0),
+                      backgroundColor: isDark
+                          ? Colors.white12
+                          : Colors.grey.shade300,
+                      valueColor: const AlwaysStoppedAnimation<Color>(
+                        Colors.teal,
+                      ),
                       minHeight: 6,
                     ),
                   ),
@@ -195,7 +240,11 @@ class AccountScreen extends ConsumerWidget {
                         isPremium
                             ? 'Unlimited saved looks'
                             : 'Saved looks: $savesRemaining of ${UsageLimits.freeSavesLimit}',
-                        style: TextStyle(fontSize: 13, color: textSecondary, fontWeight: FontWeight.w500),
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: textSecondary,
+                          fontWeight: FontWeight.w500,
+                        ),
                       ),
                       Text(
                         '${usage.savesUsed} used',
@@ -207,9 +256,16 @@ class AccountScreen extends ConsumerWidget {
                   ClipRRect(
                     borderRadius: BorderRadius.circular(4),
                     child: LinearProgressIndicator(
-                      value: isPremium ? 0.3 : (usage.savesUsed / UsageLimits.freeSavesLimit).clamp(0.0, 1.0),
-                      backgroundColor: isDark ? Colors.white12 : Colors.grey.shade300,
-                      valueColor: const AlwaysStoppedAnimation<Color>(Colors.teal),
+                      value: isPremium
+                          ? 0.3
+                          : (usage.savesUsed / UsageLimits.freeSavesLimit)
+                                .clamp(0.0, 1.0),
+                      backgroundColor: isDark
+                          ? Colors.white12
+                          : Colors.grey.shade300,
+                      valueColor: const AlwaysStoppedAnimation<Color>(
+                        Colors.teal,
+                      ),
                       minHeight: 6,
                     ),
                   ),
@@ -222,7 +278,8 @@ class AccountScreen extends ConsumerWidget {
             _sectionHeader('My avatar', textSecondary),
             const SizedBox(height: 8),
             _actionButton(
-              label: 'Edit avatar (${profilesState.activeProfile?.name ?? "Me"})',
+              label:
+                  'Edit avatar (${profilesState.activeProfile?.name ?? "Me"})',
               bgColor: buttonDarkBg,
               textColor: buttonDarkText,
               onPressed: () => context.go('/avatar'),
@@ -230,13 +287,17 @@ class AccountScreen extends ConsumerWidget {
             const SizedBox(height: 18),
 
             // Multiple Avatar Profiles Section (Fit for different people)
-            _sectionHeader('Avatar Profiles (${profilesState.profiles.length} saved)', textSecondary),
+            _sectionHeader(
+              'Avatar Profiles (${profilesState.profiles.length} saved)',
+              textSecondary,
+            ),
             const SizedBox(height: 8),
             _actionButton(
-              label: 'Switch person / Manage profiles (Fitting for: ${profilesState.activeProfile?.name ?? "Me"})',
+              label:
+                  'Switch person / Manage profiles (Fitting for: ${profilesState.activeProfile?.name ?? "Me"})',
               bgColor: buttonDarkBg,
               textColor: buttonDarkText,
-              onPressed: () => showAvatarProfileSheet(context, ref),
+              onPressed: () => showAvatarProfileSheet(context),
             ),
             const SizedBox(height: 18),
 
@@ -284,7 +345,9 @@ class AccountScreen extends ConsumerWidget {
               textColor: textSecondary,
               onPressed: () {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Local temporary photos cleared.')),
+                  const SnackBar(
+                    content: Text('Local temporary photos cleared.'),
+                  ),
                 );
               },
             ),
@@ -294,9 +357,45 @@ class AccountScreen extends ConsumerWidget {
               bgColor: Colors.red.shade700,
               textColor: Colors.white,
               isBold: true,
-              onPressed: () => _showDeleteAvatarConfirmation(context, ref),
+              onPressed: () => _showDeleteAvatarConfirmation(context),
             ),
             const SizedBox(height: 24),
+
+            _sectionHeader('Account deletion', textSecondary),
+            const SizedBox(height: 8),
+            _actionButton(
+              label: 'Delete account',
+              bgColor: Colors.red.shade700,
+              textColor: Colors.white,
+              isBold: true,
+              onPressed: () => _deleteAccount(context),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Deletion currently removes the Firebase account only. Profile records, saved looks, and uploaded media need deletion workflows when those systems are added.',
+              style: TextStyle(fontSize: 12, color: textSecondary),
+            ),
+            const SizedBox(height: 18),
+            _sectionHeader('Help and legal', textSecondary),
+            const SizedBox(height: 8),
+            _actionButton(
+              label: 'Privacy policy',
+              bgColor: buttonDarkBg,
+              textColor: buttonDarkText,
+              onPressed: () => _openLink(context, AppConfig.privacyPolicyUrl),
+            ),
+            const SizedBox(height: 8),
+            _actionButton(
+              label: 'Contact support',
+              bgColor: buttonDarkBg,
+              textColor: buttonDarkText,
+              onPressed: () => _openLink(
+                context,
+                AppConfig.supportEmail.isEmpty
+                    ? ''
+                    : 'mailto:${AppConfig.supportEmail}',
+              ),
+            ),
 
             // Account & Session Management (Only Log out button kept)
             _sectionHeader('Account & Session', textSecondary),
@@ -306,7 +405,7 @@ class AccountScreen extends ConsumerWidget {
               bgColor: Colors.red.withValues(alpha: 0.15),
               textColor: Colors.redAccent,
               isBold: true,
-              onPressed: () => _confirmLogout(context, ref),
+              onPressed: () => _confirmLogout(context),
             ),
             const SizedBox(height: 30),
           ],
@@ -377,7 +476,9 @@ class AccountScreen extends ConsumerWidget {
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
               color: cardColor,
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(24),
+              ),
             ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -395,7 +496,11 @@ class AccountScreen extends ConsumerWidget {
                 ),
                 const SizedBox(height: 18),
                 Center(
-                  child: Icon(Icons.camera_alt_outlined, size: 48, color: Colors.teal.shade400),
+                  child: Icon(
+                    Icons.camera_alt_outlined,
+                    size: 48,
+                    color: Colors.teal.shade400,
+                  ),
                 ),
                 const SizedBox(height: 12),
                 Center(
@@ -411,7 +516,11 @@ class AccountScreen extends ConsumerWidget {
                 const SizedBox(height: 12),
                 Text(
                   'Twinly needs one clear, front-facing full-body photo to create a visual try-on preview.\n\nYour photo will only be used for your try-on request. You can delete it later.',
-                  style: TextStyle(fontSize: 13, color: textSecondary, height: 1.4),
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: textSecondary,
+                    height: 1.4,
+                  ),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 18),
@@ -419,7 +528,8 @@ class AccountScreen extends ConsumerWidget {
                   contentPadding: EdgeInsets.zero,
                   value: agreed,
                   activeColor: Colors.teal,
-                  onChanged: (val) => setModalState(() => agreed = val ?? false),
+                  onChanged: (val) =>
+                      setModalState(() => agreed = val ?? false),
                   title: Text(
                     'I agree to use my photo for this try-on preview',
                     style: TextStyle(fontSize: 13, color: textPrimary),
@@ -444,16 +554,25 @@ class AccountScreen extends ConsumerWidget {
                         ? () {
                             Navigator.pop(ctx);
                             ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('Photo consent preferences updated.')),
+                              const SnackBar(
+                                content: Text(
+                                  'Photo consent preferences updated.',
+                                ),
+                              ),
                             );
                           }
                         : null,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: isDark ? Colors.white : Colors.black87,
                       foregroundColor: isDark ? Colors.black : Colors.white,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(24),
+                      ),
                     ),
-                    child: const Text('Continue with photo', style: TextStyle(fontWeight: FontWeight.bold)),
+                    child: const Text(
+                      'Continue with photo',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
                   ),
                 ),
                 const SizedBox(height: 8),
@@ -474,7 +593,7 @@ class AccountScreen extends ConsumerWidget {
     );
   }
 
-  Future<void> _showDeleteAvatarConfirmation(BuildContext context, WidgetRef ref) async {
+  Future<void> _showDeleteAvatarConfirmation(BuildContext context) async {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) {
@@ -504,17 +623,94 @@ class AccountScreen extends ConsumerWidget {
     );
 
     if (confirmed == true) {
-      await ref.read(userProfileProvider.notifier).clear();
+      await AuthService().signOut();
+      if (!context.mounted) return;
+      await context.read<RevenueCatService>().logout();
+      if (!context.mounted) return;
+      await context.read<UserProfileState>().clear();
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Avatar data deleted from local storage.')),
+          const SnackBar(
+            content: Text('Avatar data deleted from local storage.'),
+          ),
         );
         context.go('/onboarding');
       }
     }
   }
 
-  Future<void> _confirmLogout(BuildContext context, WidgetRef ref) async {
+  Future<void> _deleteAccount(BuildContext context) async {
+    final first = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Delete account?'),
+        content: const Text(
+          'This is permanent. Your Firebase account will be deleted. Local profile data and future saved media require separate cleanup when those systems exist.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(dialogContext, true),
+            child: const Text('Continue'),
+          ),
+        ],
+      ),
+    );
+    if (first != true || !context.mounted) return;
+    final second = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Confirm permanent deletion'),
+        content: const Text(
+          'Are you sure you want to delete your Twinly account?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: const Text('Keep account'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(dialogContext, true),
+            child: const Text('Delete permanently'),
+          ),
+        ],
+      ),
+    );
+    if (second != true || !context.mounted) return;
+    try {
+      if (!AppConfig.demoMode) await AuthService().deleteAccount();
+      if (!context.mounted) return;
+      await context.read<UserProfileState>().clear();
+      if (context.mounted) context.go('/onboarding');
+    } catch (error) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(AuthService.friendlyError(error))),
+        );
+      }
+    }
+  }
+
+  Future<void> _openLink(BuildContext context, String value) async {
+    final uri = Uri.tryParse(value);
+    if (uri == null ||
+        !await launchUrl(uri, mode: LaunchMode.externalApplication)) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'This link is not configured or could not be opened.',
+            ),
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _confirmLogout(BuildContext context) async {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) {
@@ -544,7 +740,8 @@ class AccountScreen extends ConsumerWidget {
     );
 
     if (confirmed == true) {
-      await ref.read(userProfileProvider.notifier).clear();
+      if (!context.mounted) return;
+      await context.read<UserProfileState>().clear();
       if (context.mounted) {
         context.go('/onboarding');
       }

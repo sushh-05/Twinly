@@ -1,22 +1,26 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/providers/avatar_profiles_state.dart';
 import '../../core/providers/theme_state.dart';
 import '../../core/providers/user_profile_state.dart';
+import '../../config/app_config.dart';
+import '../../services/auth_service.dart';
+import '../../services/revenuecat_service.dart';
+
+import 'package:provider/provider.dart';
 
 /// Best-in-class Sign In and Sign Up (Create Account) screen for Twinly.
 /// Features secure authentication rules, password creation & confirmation,
 /// dark/light mode toggle in the top bar, and initial body frame/size setup.
-class OnboardingScreen extends ConsumerStatefulWidget {
+class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key});
 
   @override
-  ConsumerState<OnboardingScreen> createState() => _OnboardingScreenState();
+  State<OnboardingScreen> createState() => _OnboardingScreenState();
 }
 
-class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
+class _OnboardingScreenState extends State<OnboardingScreen> {
   // 0 = Sign Up (Create Account), 1 = Sign In
   int _activeTab = 0;
 
@@ -33,6 +37,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   final _signInPasswordController = TextEditingController();
   bool _rememberMe = true;
   bool _obscureSignInPassword = true;
+  bool _isSubmitting = false;
 
   // Sign up preferences: Gender & Standard Size preset
   bool _isFeminine = true;
@@ -59,7 +64,10 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
             Expanded(
               child: Text(
                 message,
-                style: const TextStyle(fontWeight: FontWeight.w600, color: Colors.white),
+                style: const TextStyle(
+                  fontWeight: FontWeight.w600,
+                  color: Colors.white,
+                ),
               ),
             ),
           ],
@@ -86,8 +94,8 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       _showError('Please enter a valid email address (e.g. name@domain.com).');
       return;
     }
-    if (password.length < 6) {
-      _showError('Password must be at least 6 characters long.');
+    if (password.length < 8) {
+      _showError('Password must be at least 8 characters long.');
       return;
     }
     if (password != confirmPassword) {
@@ -95,22 +103,41 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       return;
     }
 
-    // 1. Set up initial avatar profile & size preset
-    await ref.read(avatarProfilesProvider.notifier).setInitialProfile(
-          name: '$name (Me)',
-          isFeminine: _isFeminine,
-          sizePreset: _selectedSize,
-        );
+    setState(() => _isSubmitting = true);
+    try {
+      if (!AppConfig.demoMode) {
+        final credential = await AuthService().signUp(email, password);
+        await credential.user?.updateDisplayName(name);
+        if (credential.user != null) {
+          await context.read<RevenueCatService>().identify(
+            credential.user!.uid,
+          );
+        }
+      }
 
-    // 2. Persist user session to disk
-    await ref.read(userProfileProvider.notifier).save(
-          name: name,
-          email: email,
-          isFeminine: _isFeminine,
-        );
+      if (!mounted) return;
 
-    if (!mounted) return;
-    context.go('/avatar');
+      // Set up initial avatar profile & size preset
+      await context.read<AvatarProfilesState>().setInitialProfile(
+        name: '$name (Me)',
+        isFeminine: _isFeminine,
+        sizePreset: _selectedSize,
+      );
+
+      // 2. Persist user session to disk
+      await context.read<UserProfileState>().save(
+        name: name,
+        email: email,
+        isFeminine: _isFeminine,
+      );
+
+      if (!mounted) return;
+      context.go('/profile');
+    } catch (error) {
+      if (mounted) _showError(AuthService.friendlyError(error));
+    } finally {
+      if (mounted) setState(() => _isSubmitting = false);
+    }
   }
 
   Future<void> _onSignIn() async {
@@ -122,31 +149,69 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       _showError('Please enter a valid registered email address.');
       return;
     }
-    if (password.length < 6) {
-      _showError('Password must be at least 6 characters long.');
+    if (password.length < 8) {
+      _showError('Password must be at least 8 characters long.');
       return;
     }
 
-    final name = email.split('@').first;
-    final formattedName = name.isNotEmpty
-        ? '${name[0].toUpperCase()}${name.substring(1)}'
-        : 'User';
+    setState(() => _isSubmitting = true);
+    try {
+      if (!AppConfig.demoMode) {
+        final credential = await AuthService().signIn(email, password);
+        if (credential.user != null) {
+          await context.read<RevenueCatService>().identify(
+            credential.user!.uid,
+          );
+        }
+      }
+      if (!mounted) return;
+      final name = email.split('@').first;
+      final formattedName = name.isNotEmpty
+          ? '${name[0].toUpperCase()}${name.substring(1)}'
+          : 'User';
 
-    // Set or preserve active profile
-    await ref.read(avatarProfilesProvider.notifier).setInitialProfile(
-          name: '$formattedName (Me)',
-          isFeminine: _isFeminine,
-          sizePreset: _selectedSize,
+      // Set or preserve active profile
+      await context.read<AvatarProfilesState>().setInitialProfile(
+        name: '$formattedName (Me)',
+        isFeminine: _isFeminine,
+        sizePreset: _selectedSize,
+      );
+
+      await context.read<UserProfileState>().save(
+        name: formattedName,
+        email: email,
+        isFeminine: _isFeminine,
+      );
+
+      if (!mounted) return;
+      context.go('/profile');
+    } catch (error) {
+      if (mounted) _showError(AuthService.friendlyError(error));
+    } finally {
+      if (mounted) setState(() => _isSubmitting = false);
+    }
+  }
+
+  Future<void> _onForgotPassword() async {
+    final email = _signInEmailController.text.trim();
+    if (!RegExp(r'^[\w\.-]+@[\w\.-]+\.\w{2,}$').hasMatch(email)) {
+      _showError('Enter your email first to receive a reset link.');
+      return;
+    }
+    if (AppConfig.demoMode) {
+      _showError('Password reset is unavailable in Demo Mode.');
+      return;
+    }
+    try {
+      await AuthService().sendPasswordReset(email);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Password reset email sent.')),
         );
-
-    await ref.read(userProfileProvider.notifier).save(
-          name: formattedName,
-          email: email,
-          isFeminine: _isFeminine,
-        );
-
-    if (!mounted) return;
-    context.go('/avatar');
+      }
+    } catch (error) {
+      if (mounted) _showError(AuthService.friendlyError(error));
+    }
   }
 
   @override
@@ -167,11 +232,15 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     final cardBg = isDark ? const Color(0xFF1E1E24) : Colors.white;
     final textPri = isDark ? Colors.white : const Color(0xFF111827);
     final textSec = isDark ? Colors.white60 : const Color(0xFF6B7280);
-    final borderColor = isDark ? Colors.white12 : Colors.black.withValues(alpha: 0.08);
+    final borderColor = isDark
+        ? Colors.white12
+        : Colors.black.withValues(alpha: 0.08);
 
     // Live preview measurements for selected size preset
-    final previewMeasurements =
-        AvatarSizePresets.getMeasurements(_isFeminine, _selectedSize);
+    final previewMeasurements = AvatarSizePresets.getMeasurements(
+      _isFeminine,
+      _selectedSize,
+    );
 
     return Scaffold(
       body: Container(
@@ -182,6 +251,19 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                if (AppConfig.demoMode)
+                  Container(
+                    width: double.infinity,
+                    margin: const EdgeInsets.only(bottom: 12),
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.secondaryContainer,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: const Text(
+                      'Demo mode — authentication is not connected.',
+                    ),
+                  ),
                 // Top Brand & Mode row (Theme switcher added, guest bypass removed)
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -244,13 +326,17 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                       ),
                       child: IconButton(
                         icon: Icon(
-                          isDark ? Icons.light_mode_outlined : Icons.dark_mode_outlined,
+                          isDark
+                              ? Icons.light_mode_outlined
+                              : Icons.dark_mode_outlined,
                           color: isDark ? Colors.amber : Colors.teal.shade700,
                           size: 20,
                         ),
-                        tooltip: isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode',
+                        tooltip: isDark
+                            ? 'Switch to Light Mode'
+                            : 'Switch to Dark Mode',
                         onPressed: () {
-                          ref.read(themeModeProvider.notifier).toggle();
+                          context.read<ThemeModeState>().toggle();
                         },
                       ),
                     ),
@@ -273,11 +359,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                   _activeTab == 0
                       ? 'Create your account to fit clothes on yourself and your loved ones.'
                       : 'Sign in to access your fitting room and saved looks.',
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: textSec,
-                    height: 1.35,
-                  ),
+                  style: TextStyle(fontSize: 14, color: textSec, height: 1.35),
                 ),
                 const SizedBox(height: 20),
 
@@ -285,7 +367,9 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                 Container(
                   padding: const EdgeInsets.all(4),
                   decoration: BoxDecoration(
-                    color: isDark ? const Color(0xFF282832) : Colors.grey.shade200,
+                    color: isDark
+                        ? const Color(0xFF282832)
+                        : Colors.grey.shade200,
                     borderRadius: BorderRadius.circular(16),
                   ),
                   child: Row(
@@ -298,13 +382,17 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                             padding: const EdgeInsets.symmetric(vertical: 12),
                             decoration: BoxDecoration(
                               color: _activeTab == 0
-                                  ? (isDark ? const Color(0xFF1E1E24) : Colors.white)
+                                  ? (isDark
+                                        ? const Color(0xFF1E1E24)
+                                        : Colors.white)
                                   : Colors.transparent,
                               borderRadius: BorderRadius.circular(12),
                               boxShadow: _activeTab == 0
                                   ? [
                                       BoxShadow(
-                                        color: Colors.black.withValues(alpha: 0.08),
+                                        color: Colors.black.withValues(
+                                          alpha: 0.08,
+                                        ),
                                         blurRadius: 6,
                                       ),
                                     ]
@@ -317,15 +405,20 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                                   Icon(
                                     Icons.person_add_alt_1_outlined,
                                     size: 17,
-                                    color: _activeTab == 0 ? Colors.teal : textSec,
+                                    color: _activeTab == 0
+                                        ? Colors.teal
+                                        : textSec,
                                   ),
                                   const SizedBox(width: 6),
                                   Text(
                                     'Create Account',
                                     style: TextStyle(
-                                      fontWeight:
-                                          _activeTab == 0 ? FontWeight.bold : FontWeight.w500,
-                                      color: _activeTab == 0 ? textPri : textSec,
+                                      fontWeight: _activeTab == 0
+                                          ? FontWeight.bold
+                                          : FontWeight.w500,
+                                      color: _activeTab == 0
+                                          ? textPri
+                                          : textSec,
                                       fontSize: 14,
                                     ),
                                   ),
@@ -343,13 +436,17 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                             padding: const EdgeInsets.symmetric(vertical: 12),
                             decoration: BoxDecoration(
                               color: _activeTab == 1
-                                  ? (isDark ? const Color(0xFF1E1E24) : Colors.white)
+                                  ? (isDark
+                                        ? const Color(0xFF1E1E24)
+                                        : Colors.white)
                                   : Colors.transparent,
                               borderRadius: BorderRadius.circular(12),
                               boxShadow: _activeTab == 1
                                   ? [
                                       BoxShadow(
-                                        color: Colors.black.withValues(alpha: 0.08),
+                                        color: Colors.black.withValues(
+                                          alpha: 0.08,
+                                        ),
                                         blurRadius: 6,
                                       ),
                                     ]
@@ -362,15 +459,20 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                                   Icon(
                                     Icons.login_outlined,
                                     size: 17,
-                                    color: _activeTab == 1 ? Colors.teal : textSec,
+                                    color: _activeTab == 1
+                                        ? Colors.teal
+                                        : textSec,
                                   ),
                                   const SizedBox(width: 6),
                                   Text(
                                     'Sign In',
                                     style: TextStyle(
-                                      fontWeight:
-                                          _activeTab == 1 ? FontWeight.bold : FontWeight.w500,
-                                      color: _activeTab == 1 ? textPri : textSec,
+                                      fontWeight: _activeTab == 1
+                                          ? FontWeight.bold
+                                          : FontWeight.w500,
+                                      color: _activeTab == 1
+                                          ? textPri
+                                          : textSec,
                                       fontSize: 14,
                                     ),
                                   ),
@@ -419,7 +521,10 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(14),
-                        borderSide: const BorderSide(color: Colors.teal, width: 2),
+                        borderSide: const BorderSide(
+                          color: Colors.teal,
+                          width: 2,
+                        ),
                       ),
                     ),
                   ),
@@ -446,7 +551,10 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(14),
-                        borderSide: const BorderSide(color: Colors.teal, width: 2),
+                        borderSide: const BorderSide(
+                          color: Colors.teal,
+                          width: 2,
+                        ),
                       ),
                     ),
                   ),
@@ -462,11 +570,15 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                       prefixIcon: const Icon(Icons.lock_outline, size: 20),
                       suffixIcon: IconButton(
                         icon: Icon(
-                          _obscureSignUpPassword ? Icons.visibility_off : Icons.visibility,
+                          _obscureSignUpPassword
+                              ? Icons.visibility_off
+                              : Icons.visibility,
                           size: 20,
                         ),
-                        onPressed: () =>
-                            setState(() => _obscureSignUpPassword = !_obscureSignUpPassword),
+                        onPressed: () => setState(
+                          () =>
+                              _obscureSignUpPassword = !_obscureSignUpPassword,
+                        ),
                       ),
                       filled: true,
                       fillColor: cardBg,
@@ -480,7 +592,10 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(14),
-                        borderSide: const BorderSide(color: Colors.teal, width: 2),
+                        borderSide: const BorderSide(
+                          color: Colors.teal,
+                          width: 2,
+                        ),
                       ),
                     ),
                   ),
@@ -493,14 +608,21 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                     style: TextStyle(color: textPri),
                     decoration: InputDecoration(
                       labelText: 'Confirm Password *',
-                      prefixIcon: const Icon(Icons.lock_reset_outlined, size: 20),
+                      prefixIcon: const Icon(
+                        Icons.lock_reset_outlined,
+                        size: 20,
+                      ),
                       suffixIcon: IconButton(
                         icon: Icon(
-                          _obscureSignUpConfirmPassword ? Icons.visibility_off : Icons.visibility,
+                          _obscureSignUpConfirmPassword
+                              ? Icons.visibility_off
+                              : Icons.visibility,
                           size: 20,
                         ),
                         onPressed: () => setState(
-                            () => _obscureSignUpConfirmPassword = !_obscureSignUpConfirmPassword),
+                          () => _obscureSignUpConfirmPassword =
+                              !_obscureSignUpConfirmPassword,
+                        ),
                       ),
                       filled: true,
                       fillColor: cardBg,
@@ -514,7 +636,10 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(14),
-                        borderSide: const BorderSide(color: Colors.teal, width: 2),
+                        borderSide: const BorderSide(
+                          color: Colors.teal,
+                          width: 2,
+                        ),
                       ),
                     ),
                   ),
@@ -600,7 +725,10 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                           onTap: () => setState(() => _selectedSize = size),
                           child: AnimatedContainer(
                             duration: const Duration(milliseconds: 150),
-                            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 14,
+                              vertical: 10,
+                            ),
                             decoration: BoxDecoration(
                               color: isSel ? Colors.teal : Colors.transparent,
                               borderRadius: BorderRadius.circular(12),
@@ -623,27 +751,38 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                   // Live Measurements Preview Card
                   Container(
                     width: double.infinity,
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 12,
+                    ),
                     decoration: BoxDecoration(
                       color: isDark
                           ? const Color(0xFF142424)
                           : Colors.teal.shade50.withValues(alpha: 0.7),
                       borderRadius: BorderRadius.circular(14),
-                      border: Border.all(color: Colors.teal.withValues(alpha: 0.3)),
+                      border: Border.all(
+                        color: Colors.teal.withValues(alpha: 0.3),
+                      ),
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Row(
                           children: [
-                            Icon(Icons.tune_rounded, size: 16, color: Colors.teal.shade400),
+                            Icon(
+                              Icons.tune_rounded,
+                              size: 16,
+                              color: Colors.teal.shade400,
+                            ),
                             const SizedBox(width: 6),
                             Text(
                               'Size $_selectedSize Standard Dimensions:',
                               style: TextStyle(
                                 fontSize: 12.5,
                                 fontWeight: FontWeight.bold,
-                                color: isDark ? Colors.teal.shade200 : Colors.teal.shade900,
+                                color: isDark
+                                    ? Colors.teal.shade200
+                                    : Colors.teal.shade900,
                               ),
                             ),
                           ],
@@ -653,7 +792,9 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                           'Height: ${previewMeasurements.height.round()}cm  ·  ${_isFeminine ? "Bust" : "Chest"}: ${previewMeasurements.chest.round()}cm  ·  Waist: ${previewMeasurements.waist.round()}cm  ·  Hip: ${previewMeasurements.hip.round()}cm',
                           style: TextStyle(
                             fontSize: 12,
-                            color: isDark ? Colors.teal.shade100 : Colors.teal.shade800,
+                            color: isDark
+                                ? Colors.teal.shade100
+                                : Colors.teal.shade800,
                           ),
                         ),
                       ],
@@ -666,7 +807,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                     width: double.infinity,
                     height: 52,
                     child: ElevatedButton(
-                      onPressed: _onCreateAccount,
+                      onPressed: _isSubmitting ? null : _onCreateAccount,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.teal,
                         foregroundColor: Colors.white,
@@ -676,12 +817,24 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                           borderRadius: BorderRadius.circular(26),
                         ),
                       ),
-                      child: const Row(
+                      child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
+                          if (_isSubmitting)
+                            const SizedBox(
+                              width: 18,
+                              height: 18,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: Colors.white,
+                              ),
+                            ),
                           Text(
                             'Create Account & Start Fitting',
-                            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                           SizedBox(width: 8),
                           Icon(Icons.arrow_forward_rounded, size: 20),
@@ -723,7 +876,10 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(14),
-                        borderSide: const BorderSide(color: Colors.teal, width: 2),
+                        borderSide: const BorderSide(
+                          color: Colors.teal,
+                          width: 2,
+                        ),
                       ),
                     ),
                   ),
@@ -739,11 +895,15 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                       prefixIcon: const Icon(Icons.lock_outline, size: 20),
                       suffixIcon: IconButton(
                         icon: Icon(
-                          _obscureSignInPassword ? Icons.visibility_off : Icons.visibility,
+                          _obscureSignInPassword
+                              ? Icons.visibility_off
+                              : Icons.visibility,
                           size: 20,
                         ),
-                        onPressed: () =>
-                            setState(() => _obscureSignInPassword = !_obscureSignInPassword),
+                        onPressed: () => setState(
+                          () =>
+                              _obscureSignInPassword = !_obscureSignInPassword,
+                        ),
                       ),
                       filled: true,
                       fillColor: cardBg,
@@ -757,7 +917,10 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(14),
-                        borderSide: const BorderSide(color: Colors.teal, width: 2),
+                        borderSide: const BorderSide(
+                          color: Colors.teal,
+                          width: 2,
+                        ),
                       ),
                     ),
                   ),
@@ -772,23 +935,23 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                           Checkbox(
                             value: _rememberMe,
                             activeColor: Colors.teal,
-                            onChanged: (val) => setState(() => _rememberMe = val ?? true),
+                            onChanged: (val) =>
+                                setState(() => _rememberMe = val ?? true),
                           ),
-                          Text('Remember me', style: TextStyle(color: textSec, fontSize: 13)),
+                          Text(
+                            'Remember me',
+                            style: TextStyle(color: textSec, fontSize: 13),
+                          ),
                         ],
                       ),
                       TextButton(
-                        onPressed: () {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Password reset link sent to registered email.'),
-                              behavior: SnackBarBehavior.floating,
-                            ),
-                          );
-                        },
+                        onPressed: _isSubmitting ? null : _onForgotPassword,
                         child: Text(
                           'Forgot password?',
-                          style: TextStyle(color: Colors.teal.shade400, fontSize: 13),
+                          style: TextStyle(
+                            color: Colors.teal.shade400,
+                            fontSize: 13,
+                          ),
                         ),
                       ),
                     ],
@@ -800,7 +963,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                     width: double.infinity,
                     height: 52,
                     child: ElevatedButton(
-                      onPressed: _onSignIn,
+                      onPressed: _isSubmitting ? null : _onSignIn,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.teal,
                         foregroundColor: Colors.white,
@@ -810,12 +973,24 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                           borderRadius: BorderRadius.circular(26),
                         ),
                       ),
-                      child: const Row(
+                      child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
+                          if (_isSubmitting)
+                            const SizedBox(
+                              width: 18,
+                              height: 18,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: Colors.white,
+                              ),
+                            ),
                           Text(
                             'Sign In to Twinly',
-                            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                           SizedBox(width: 8),
                           Icon(Icons.login_rounded, size: 20),
@@ -868,7 +1043,9 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
           color: isSelected ? Colors.teal.withValues(alpha: 0.12) : cardBg,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: isSelected ? Colors.teal : Colors.grey.withValues(alpha: 0.25),
+            color: isSelected
+                ? Colors.teal
+                : Colors.grey.withValues(alpha: 0.25),
             width: isSelected ? 2.5 : 1,
           ),
           boxShadow: isSelected
@@ -885,7 +1062,9 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
           children: [
             CircleAvatar(
               radius: 26,
-              backgroundColor: isSelected ? Colors.teal : Colors.grey.withValues(alpha: 0.15),
+              backgroundColor: isSelected
+                  ? Colors.teal
+                  : Colors.grey.withValues(alpha: 0.15),
               child: Icon(
                 icon,
                 color: isSelected ? Colors.white : textPri,
@@ -905,10 +1084,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
             Text(
               subtitle,
               textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 11,
-                color: textSec,
-              ),
+              style: TextStyle(fontSize: 11, color: textSec),
             ),
           ],
         ),

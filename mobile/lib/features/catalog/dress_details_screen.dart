@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/providers/garment_state.dart';
@@ -7,15 +7,15 @@ import '../../models/garment.dart';
 import '../../widgets/garment_image.dart';
 import '../../widgets/size_chart_sheet.dart';
 
-class DressDetailsScreen extends ConsumerStatefulWidget {
+class DressDetailsScreen extends StatefulWidget {
   final Garment garment;
   const DressDetailsScreen({super.key, required this.garment});
 
   @override
-  ConsumerState<DressDetailsScreen> createState() => _DressDetailsScreenState();
+  State<DressDetailsScreen> createState() => _DressDetailsScreenState();
 }
 
-class _DressDetailsScreenState extends ConsumerState<DressDetailsScreen> {
+class _DressDetailsScreenState extends State<DressDetailsScreen> {
   String? _selectedSize;
 
   @override
@@ -25,8 +25,9 @@ class _DressDetailsScreenState extends ConsumerState<DressDetailsScreen> {
       if (widget.garment.availableSizes.contains('L')) {
         _selectedSize = 'L';
       } else {
-        _selectedSize = widget.garment.availableSizes[
-            (widget.garment.availableSizes.length / 2).floor()];
+        _selectedSize = widget
+            .garment
+            .availableSizes[(widget.garment.availableSizes.length / 2).floor()];
       }
     }
   }
@@ -59,12 +60,18 @@ class _DressDetailsScreenState extends ConsumerState<DressDetailsScreen> {
                     GarmentImage(garment: d),
                     SafeArea(
                       child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 8,
+                        ),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            _circleIconButton(Icons.arrow_back, () => Navigator.of(context).pop()),
+                            _circleIconButton(
+                              Icons.arrow_back,
+                              () => Navigator.of(context).pop(),
+                            ),
                             _circleIconButton(Icons.ios_share, () {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(content: Text('Sharing ${d.name}...')),
@@ -114,21 +121,38 @@ class _DressDetailsScreenState extends ConsumerState<DressDetailsScreen> {
                         ),
                       ),
                       const SizedBox(height: 18),
-                      _detailLine('Dress silhouette:', d.silhouette ?? 'Wrap midi dress', textSecondary, textPrimary),
                       _detailLine(
-                        'Fabric stretch:',
-                        d.stretch != null ? '${d.stretch!} stretch' : 'Low stretch',
+                        'Dress silhouette:',
+                        d.silhouette ?? 'Wrap midi dress',
                         textSecondary,
                         textPrimary,
                       ),
-                      if (d.fabricMaterial != null && d.fabricMaterial!.isNotEmpty)
-                        _detailLine('Fabric material:', d.fabricMaterial!, textSecondary, textPrimary),
+                      _detailLine(
+                        'Fabric stretch:',
+                        d.stretch != null
+                            ? '${d.stretch!} stretch'
+                            : 'Low stretch',
+                        textSecondary,
+                        textPrimary,
+                      ),
+                      if (d.fabricMaterial != null &&
+                          d.fabricMaterial!.isNotEmpty)
+                        _detailLine(
+                          'Fabric material:',
+                          d.fabricMaterial!,
+                          textSecondary,
+                          textPrimary,
+                        ),
                       const SizedBox(height: 20),
 
                       // Size Selector
                       Text(
                         'Size',
-                        style: TextStyle(color: textSecondary, fontSize: 13, fontWeight: FontWeight.w500),
+                        style: TextStyle(
+                          color: textSecondary,
+                          fontSize: 13,
+                          fontWeight: FontWeight.w500,
+                        ),
                       ),
                       const SizedBox(height: 10),
                       Row(
@@ -156,7 +180,9 @@ class _DressDetailsScreenState extends ConsumerState<DressDetailsScreen> {
                                   boxShadow: [
                                     if (!isDark && !isSelected)
                                       BoxShadow(
-                                        color: Colors.black.withValues(alpha: 0.04),
+                                        color: Colors.black.withValues(
+                                          alpha: 0.04,
+                                        ),
                                         blurRadius: 4,
                                         offset: const Offset(0, 1),
                                       ),
@@ -185,7 +211,10 @@ class _DressDetailsScreenState extends ConsumerState<DressDetailsScreen> {
                           onTap: () => SizeChartSheet.show(context, d),
                           borderRadius: BorderRadius.circular(8),
                           child: Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 8,
+                            ),
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
@@ -195,11 +224,17 @@ class _DressDetailsScreenState extends ConsumerState<DressDetailsScreen> {
                                     color: textSecondary,
                                     fontSize: 13.5,
                                     decoration: TextDecoration.underline,
-                                    decorationColor: textSecondary.withValues(alpha: 0.5),
+                                    decorationColor: textSecondary.withValues(
+                                      alpha: 0.5,
+                                    ),
                                   ),
                                 ),
                                 const SizedBox(width: 4),
-                                Icon(Icons.chevron_right, color: textSecondary, size: 18),
+                                Icon(
+                                  Icons.chevron_right,
+                                  color: textSecondary,
+                                  size: 18,
+                                ),
                               ],
                             ),
                           ),
@@ -222,7 +257,7 @@ class _DressDetailsScreenState extends ConsumerState<DressDetailsScreen> {
               height: 52,
               child: ElevatedButton(
                 onPressed: () {
-                  ref.read(selectedGarmentProvider.notifier).select(d);
+                  context.read<SelectedGarmentState>().select(d);
                   Navigator.of(context).pop();
                   context.go('/fitting');
                 },
@@ -251,7 +286,12 @@ class _DressDetailsScreenState extends ConsumerState<DressDetailsScreen> {
     );
   }
 
-  Widget _detailLine(String label, String value, Color labelColor, Color valueColor) {
+  Widget _detailLine(
+    String label,
+    String value,
+    Color labelColor,
+    Color valueColor,
+  ) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 6),
       child: RichText(

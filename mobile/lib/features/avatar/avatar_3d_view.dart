@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:provider/provider.dart';
 import 'package:model_viewer_plus/model_viewer_plus.dart';
 
 import '../../core/providers/avatar_state.dart';
 
-class Avatar3DView extends ConsumerWidget {
+class Avatar3DView extends StatelessWidget {
   final double height;
   final bool isSideView;
   final Widget? overlay;
@@ -17,9 +17,9 @@ class Avatar3DView extends ConsumerWidget {
   });
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    // Read shared measurements from Person A's Riverpod state
-    final m = ref.watch(avatarMeasurementsProvider);
+  Widget build(BuildContext context) {
+    // Read shared measurements from the app's ChangeNotifier state.
+    final m = context.watch<AvatarMeasurementsState>().value;
 
     // Person B baseline scaling (Contract: Height 165cm, Waist 72cm, Hip 95cm)
     final double scaleX = (m.waist / 72.0).clamp(0.70, 1.40);

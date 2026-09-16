@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:provider/provider.dart';
 
 import '../core/providers/avatar_profiles_state.dart';
 
 /// Modal bottom sheet allowing users to switch between multiple named avatar profiles
 /// (e.g. "Priya (Me)", "Sister", "Mom", "Friend") or add a new person under one account.
-void showAvatarProfileSheet(BuildContext context, WidgetRef ref) {
+void showAvatarProfileSheet(BuildContext context) {
   showModalBottomSheet(
     context: context,
     isScrollControlled: true,
@@ -14,20 +14,20 @@ void showAvatarProfileSheet(BuildContext context, WidgetRef ref) {
   );
 }
 
-class _AvatarProfileSheetContent extends ConsumerStatefulWidget {
+class _AvatarProfileSheetContent extends StatefulWidget {
   const _AvatarProfileSheetContent();
 
   @override
-  ConsumerState<_AvatarProfileSheetContent> createState() =>
+  State<_AvatarProfileSheetContent> createState() =>
       _AvatarProfileSheetContentState();
 }
 
 class _AvatarProfileSheetContentState
-    extends ConsumerState<_AvatarProfileSheetContent> {
+    extends State<_AvatarProfileSheetContent> {
   @override
   Widget build(BuildContext context) {
-    final profilesState = ref.watch(avatarProfilesProvider);
-    final profilesNotifier = ref.read(avatarProfilesProvider.notifier);
+    final profilesState = context.watch<AvatarProfilesState>();
+    final profilesNotifier = context.read<AvatarProfilesState>();
 
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final cardBg = isDark ? const Color(0xFF1E1E24) : Colors.white;
@@ -112,7 +112,9 @@ class _AvatarProfileSheetContentState
                     }
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
-                        content: Text('Switched fitting profile to ${profile.name}'),
+                        content: Text(
+                          'Switched fitting profile to ${profile.name}',
+                        ),
                         duration: const Duration(seconds: 2),
                         behavior: SnackBarBehavior.floating,
                       ),
@@ -124,16 +126,18 @@ class _AvatarProfileSheetContentState
                     decoration: BoxDecoration(
                       color: isActive
                           ? (isDark
-                              ? Colors.teal.shade900.withValues(alpha: 0.35)
-                              : Colors.teal.shade50)
+                                ? Colors.teal.shade900.withValues(alpha: 0.35)
+                                : Colors.teal.shade50)
                           : (isDark
-                              ? const Color(0xFF282830)
-                              : Colors.grey.shade100),
+                                ? const Color(0xFF282830)
+                                : Colors.grey.shade100),
                       borderRadius: BorderRadius.circular(16),
                       border: Border.all(
                         color: isActive
                             ? Colors.teal
-                            : (isDark ? Colors.white10 : Colors.black.withValues(alpha: 0.05)),
+                            : (isDark
+                                  ? Colors.white10
+                                  : Colors.black.withValues(alpha: 0.05)),
                         width: isActive ? 2 : 1,
                       ),
                     ),
@@ -144,10 +148,14 @@ class _AvatarProfileSheetContentState
                           radius: 22,
                           backgroundColor: isActive
                               ? Colors.teal
-                              : (isDark ? Colors.grey.shade800 : Colors.grey.shade300),
+                              : (isDark
+                                    ? Colors.grey.shade800
+                                    : Colors.grey.shade300),
                           child: Icon(
                             profile.isFeminine ? Icons.female : Icons.male,
-                            color: isActive ? Colors.white : (isDark ? Colors.white70 : Colors.black87),
+                            color: isActive
+                                ? Colors.white
+                                : (isDark ? Colors.white70 : Colors.black87),
                             size: 24,
                           ),
                         ),
@@ -171,11 +179,15 @@ class _AvatarProfileSheetContentState
                                   const SizedBox(width: 8),
                                   Container(
                                     padding: const EdgeInsets.symmetric(
-                                        horizontal: 7, vertical: 2),
+                                      horizontal: 7,
+                                      vertical: 2,
+                                    ),
                                     decoration: BoxDecoration(
                                       color: isDark
                                           ? Colors.white12
-                                          : Colors.black.withValues(alpha: 0.06),
+                                          : Colors.black.withValues(
+                                              alpha: 0.06,
+                                            ),
                                       borderRadius: BorderRadius.circular(6),
                                     ),
                                     child: Text(
@@ -190,9 +202,13 @@ class _AvatarProfileSheetContentState
                                   const SizedBox(width: 6),
                                   Container(
                                     padding: const EdgeInsets.symmetric(
-                                        horizontal: 7, vertical: 2),
+                                      horizontal: 7,
+                                      vertical: 2,
+                                    ),
                                     decoration: BoxDecoration(
-                                      color: Colors.teal.withValues(alpha: 0.15),
+                                      color: Colors.teal.withValues(
+                                        alpha: 0.15,
+                                      ),
                                       borderRadius: BorderRadius.circular(6),
                                     ),
                                     child: Text(
@@ -209,10 +225,7 @@ class _AvatarProfileSheetContentState
                               const SizedBox(height: 4),
                               Text(
                                 '${profile.measurements.height.round()}cm · Bust ${profile.measurements.chest.round()}cm · Waist ${profile.measurements.waist.round()}cm · Hip ${profile.measurements.hip.round()}cm',
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  color: textSec,
-                                ),
+                                style: TextStyle(fontSize: 12, color: textSec),
                               ),
                             ],
                           ),
@@ -222,13 +235,19 @@ class _AvatarProfileSheetContentState
                         if (isActive)
                           const Padding(
                             padding: EdgeInsets.symmetric(horizontal: 6),
-                            child: Icon(Icons.check_circle,
-                                color: Colors.teal, size: 22),
+                            child: Icon(
+                              Icons.check_circle,
+                              color: Colors.teal,
+                              size: 22,
+                            ),
                           )
                         else if (profilesState.profiles.length > 1)
                           IconButton(
-                            icon: Icon(Icons.delete_outline,
-                                color: Colors.red.shade400, size: 20),
+                            icon: Icon(
+                              Icons.delete_outline,
+                              color: Colors.red.shade400,
+                              size: 20,
+                            ),
                             tooltip: 'Remove profile',
                             onPressed: () {
                               _confirmDelete(context, profile);
@@ -276,7 +295,8 @@ class _AvatarProfileSheetContentState
       builder: (ctx) => AlertDialog(
         title: Text('Delete ${profile.name}?'),
         content: Text(
-            'Are you sure you want to remove ${profile.name}\'s profile and body measurements from this account?'),
+          'Are you sure you want to remove ${profile.name}\'s profile and body measurements from this account?',
+        ),
         actions: [
           TextButton(
             onPressed: () {
@@ -288,7 +308,7 @@ class _AvatarProfileSheetContentState
           ),
           ElevatedButton(
             onPressed: () {
-              ref.read(avatarProfilesProvider.notifier).deleteProfile(profile.id);
+              context.read<AvatarProfilesState>().deleteProfile(profile.id);
               if (Navigator.of(ctx).canPop()) {
                 Navigator.of(ctx).pop();
               }
@@ -312,13 +332,16 @@ class _AvatarProfileSheetContentState
       builder: (dialogCtx) {
         return StatefulBuilder(
           builder: (dialogInnerCtx, setDialogState) {
-            final isDark = Theme.of(dialogInnerCtx).brightness == Brightness.dark;
+            final isDark =
+                Theme.of(dialogInnerCtx).brightness == Brightness.dark;
             final dialogBg = isDark ? const Color(0xFF222228) : Colors.white;
             final textPri = isDark ? Colors.white : Colors.black87;
 
             return AlertDialog(
               backgroundColor: dialogBg,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(24),
+              ),
               title: Text(
                 'Add Person for Fitting',
                 style: TextStyle(fontWeight: FontWeight.bold, color: textPri),
@@ -342,7 +365,9 @@ class _AvatarProfileSheetContentState
                         labelText: 'Person Name',
                         hintText: 'e.g. Priya, Anushila, Mom',
                         prefixIcon: const Icon(Icons.badge_outlined, size: 20),
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
                       ),
                     ),
                     const SizedBox(height: 14),
@@ -355,19 +380,38 @@ class _AvatarProfileSheetContentState
                       decoration: InputDecoration(
                         labelText: 'Relationship / Role',
                         prefixIcon: const Icon(Icons.people_outline, size: 20),
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
                       ),
                       items: const [
-                        DropdownMenuItem(value: 'Myself', child: Text('Myself')),
-                        DropdownMenuItem(value: 'Sister', child: Text('Sister')),
+                        DropdownMenuItem(
+                          value: 'Myself',
+                          child: Text('Myself'),
+                        ),
+                        DropdownMenuItem(
+                          value: 'Sister',
+                          child: Text('Sister'),
+                        ),
                         DropdownMenuItem(value: 'Mom', child: Text('Mom')),
-                        DropdownMenuItem(value: 'Friend', child: Text('Friend')),
-                        DropdownMenuItem(value: 'Brother', child: Text('Brother')),
-                        DropdownMenuItem(value: 'Partner', child: Text('Partner')),
+                        DropdownMenuItem(
+                          value: 'Friend',
+                          child: Text('Friend'),
+                        ),
+                        DropdownMenuItem(
+                          value: 'Brother',
+                          child: Text('Brother'),
+                        ),
+                        DropdownMenuItem(
+                          value: 'Partner',
+                          child: Text('Partner'),
+                        ),
                         DropdownMenuItem(value: 'Other', child: Text('Other')),
                       ],
                       onChanged: (val) {
-                        if (val != null) setDialogState(() => selectedRelation = val);
+                        if (val != null) {
+                          setDialogState(() => selectedRelation = val);
+                        }
                       },
                     ),
                     const SizedBox(height: 14),
@@ -375,7 +419,10 @@ class _AvatarProfileSheetContentState
                     // Gender toggle
                     const Text(
                       'Body Build & Gender:',
-                      style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                     const SizedBox(height: 6),
                     Row(
@@ -391,7 +438,8 @@ class _AvatarProfileSheetContentState
                               ],
                             ),
                             selected: isFeminine,
-                            onSelected: (_) => setDialogState(() => isFeminine = true),
+                            onSelected: (_) =>
+                                setDialogState(() => isFeminine = true),
                           ),
                         ),
                         const SizedBox(width: 10),
@@ -406,7 +454,8 @@ class _AvatarProfileSheetContentState
                               ],
                             ),
                             selected: !isFeminine,
-                            onSelected: (_) => setDialogState(() => isFeminine = false),
+                            onSelected: (_) =>
+                                setDialogState(() => isFeminine = false),
                           ),
                         ),
                       ],
@@ -416,7 +465,10 @@ class _AvatarProfileSheetContentState
                     // Standard size preset
                     const Text(
                       'Standard Size:',
-                      style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                     const SizedBox(height: 6),
                     Wrap(
@@ -426,7 +478,8 @@ class _AvatarProfileSheetContentState
                         return ChoiceChip(
                           label: Text(size),
                           selected: isSel,
-                          onSelected: (_) => setDialogState(() => selectedSize = size),
+                          onSelected: (_) =>
+                              setDialogState(() => selectedSize = size),
                         );
                       }).toList(),
                     ),
@@ -447,12 +500,12 @@ class _AvatarProfileSheetContentState
                     final name = nameCtrl.text.trim();
                     if (name.isEmpty) return;
 
-                    ref.read(avatarProfilesProvider.notifier).addProfile(
-                          name: name,
-                          relation: selectedRelation,
-                          isFeminine: isFeminine,
-                          sizePreset: selectedSize,
-                        );
+                    context.read<AvatarProfilesState>().addProfile(
+                      name: name,
+                      relation: selectedRelation,
+                      isFeminine: isFeminine,
+                      sizePreset: selectedSize,
+                    );
 
                     if (Navigator.of(dialogCtx).canPop()) {
                       Navigator.of(dialogCtx).pop(true);
@@ -475,7 +528,7 @@ class _AvatarProfileSheetContentState
       if (Navigator.of(parentContext).canPop()) {
         Navigator.of(parentContext).pop();
       }
-      final active = ref.read(avatarProfilesProvider).activeProfile;
+      final active = parentContext.read<AvatarProfilesState>().activeProfile;
       final activeName = active?.name ?? 'profile';
       ScaffoldMessenger.of(parentContext).showSnackBar(
         SnackBar(

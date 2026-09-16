@@ -97,8 +97,11 @@ class Garment {
       brand: json['brand'] as String?,
       silhouette: json['silhouette'] as String?,
       assetImagePath: json['assetImagePath'] as String?,
-      fallbackImageUrl: (json['fallbackImageUrl'] ?? json['imageUrl']) as String?,
-      verifiedSizeChart: json['sizeChartVerified'] == true || json['verifiedSizeChart'] == true,
+      fallbackImageUrl:
+          (json['fallbackImageUrl'] ?? json['imageUrl']) as String?,
+      verifiedSizeChart:
+          json['sizeChartVerified'] == true ||
+          json['verifiedSizeChart'] == true,
       fabricMaterial: json['fabricMaterial'] as String?,
       description: json['description'] as String?,
       rawSizeChart: charts,

@@ -42,17 +42,17 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions web = FirebaseOptions(
     apiKey: 'AIzaSyBr2xI20esnUHAHC9fUFiK6ARMwJBUMFEo',
-    appId: '1:500892366854:web:9e3bb628ea85d9fbe76b87',
+    appId: '1:500892366854:web:10fba3b905b1f3cde76b87',
     messagingSenderId: '500892366854',
     projectId: 'twinly-cf976',
     authDomain: 'twinly-cf976.firebaseapp.com',
     storageBucket: 'twinly-cf976.firebasestorage.app',
-    measurementId: 'G-PX8N54Q6TY',
+    measurementId: 'G-MB4TLG93T6',
   );
 
   static const FirebaseOptions android = FirebaseOptions(
     apiKey: 'AIzaSyDxbr52jT2dQQDXQWMDX2XUvOsAzhM8hAw',
-    appId: '1:500892366854:android:862f58578374c624e76b87',
+    appId: '1:500892366854:android:28b189bf97f93b50e76b87',
     messagingSenderId: '500892366854',
     projectId: 'twinly-cf976',
     storageBucket: 'twinly-cf976.firebasestorage.app',
@@ -78,11 +78,11 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions windows = FirebaseOptions(
     apiKey: 'AIzaSyBr2xI20esnUHAHC9fUFiK6ARMwJBUMFEo',
-    appId: '1:500892366854:web:10fba3b905b1f3cde76b87',
+    appId: '1:500892366854:web:6b0e89b1ee2bb3ffe76b87',
     messagingSenderId: '500892366854',
     projectId: 'twinly-cf976',
     authDomain: 'twinly-cf976.firebaseapp.com',
     storageBucket: 'twinly-cf976.firebasestorage.app',
-    measurementId: 'G-MB4TLG93T6',
+    measurementId: 'G-118NQ46CS7',
   );
 }

@@ -1,33 +1,66 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/providers/avatar_profiles_state.dart';
 import '../../core/providers/avatar_state.dart';
+import '../../services/fashion_state.dart';
 import '../../widgets/avatar_profile_sheet.dart';
 import 'body_painter.dart';
 
-class AvatarScreen extends ConsumerStatefulWidget {
+class AvatarScreen extends StatefulWidget {
   const AvatarScreen({super.key});
   @override
-  ConsumerState<AvatarScreen> createState() => _AvatarScreenState();
+  State<AvatarScreen> createState() => _AvatarScreenState();
 }
 
-class _AvatarScreenState extends ConsumerState<AvatarScreen> {
+class _AvatarScreenState extends State<AvatarScreen> {
   bool _isSideView = false;
+  bool _fashionProfileLoaded = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_fashionProfileLoaded) return;
+    final profile = context.read<FashionProfileState>().profile;
+    if (profile != null) {
+      final current = context.read<AvatarMeasurementsState>().value;
+      context.read<AvatarMeasurementsState>().setMeasurements(
+        current.copyWith(
+          height: profile.height ?? current.height,
+          shoulderWidth: profile.shoulderWidth ?? current.shoulderWidth,
+          chest: profile.bust ?? current.chest,
+          waist: profile.waist ?? current.waist,
+          hip: profile.hip ?? current.hip,
+          skinTone: profile.skinTone.toLowerCase(),
+          hairStyle: profile.hairType,
+        ),
+      );
+      _fashionProfileLoaded = true;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    final m = ref.watch(avatarMeasurementsProvider);
-    final profiles = ref.watch(avatarProfilesProvider);
+    final m = context.watch<AvatarMeasurementsState>().value;
+    final profiles = context.watch<AvatarProfilesState>();
     final dark = Theme.of(context).brightness == Brightness.dark;
     final primary = dark ? Colors.white : const Color(0xff111827);
     final secondary = dark ? Colors.white70 : const Color(0xff6b7280);
     final card = dark ? const Color(0xff16161a) : Colors.white;
 
     void update(AvatarMeasurements next) {
-      ref.read(avatarMeasurementsProvider.notifier).setMeasurements(next);
-      ref.read(avatarProfilesProvider.notifier).updateActiveMeasurements(next);
+      context.read<AvatarMeasurementsState>().setMeasurements(next);
+      context.read<AvatarProfilesState>().updateActiveMeasurements(next);
+      context.read<FashionProfileState>().updateFromAvatar(
+        height: next.height,
+        shoulderWidth: next.shoulderWidth,
+        chest: next.chest,
+        waist: next.waist,
+        hip: next.hip,
+        skinTone: next.skinTone,
+        hairType: next.hairStyle,
+      );
     }
 
     return Scaffold(
@@ -39,6 +72,11 @@ class _AvatarScreenState extends ConsumerState<AvatarScreen> {
           style: TextStyle(color: primary, fontWeight: FontWeight.bold),
         ),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.settings_outlined),
+            tooltip: 'Settings',
+            onPressed: () => context.push('/settings'),
+          ),
           IconButton(
             icon: Icon(_isSideView ? Icons.person : Icons.person_outline),
             tooltip: 'Toggle view',
@@ -153,6 +191,15 @@ class _AvatarScreenState extends ConsumerState<AvatarScreen> {
                 (v) => update(m.copyWith(height: v)),
               ),
               _slider(
+                'Shoulder width',
+                m.shoulderWidth,
+                30,
+                55,
+                m,
+                secondary,
+                (v) => update(m.copyWith(shoulderWidth: v)),
+              ),
+              _slider(
                 m.isFeminine ? 'Bust' : 'Chest',
                 m.chest,
                 70,
@@ -218,8 +265,8 @@ class _AvatarScreenState extends ConsumerState<AvatarScreen> {
                 height: 50,
                 child: ElevatedButton(
                   onPressed: () async {
-                    await ref
-                        .read(avatarProfilesProvider.notifier)
+                    await context
+                        .read<AvatarProfilesState>()
                         .updateActiveMeasurements(m);
                     if (context.mounted) {
                       ScaffoldMessenger.of(context).showSnackBar(
@@ -256,7 +303,7 @@ class _AvatarScreenState extends ConsumerState<AvatarScreen> {
               ),
               const SizedBox(height: 8),
               TextButton.icon(
-                onPressed: () => showAvatarProfileSheet(context, ref),
+                onPressed: () => showAvatarProfileSheet(context),
                 icon: const Icon(Icons.people_outline),
                 label: Text('Profile: ${profiles.activeProfile?.name ?? 'Me'}'),
               ),

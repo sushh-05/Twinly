@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../models/garment.dart';
 
 class SizeChartSheet extends StatelessWidget {
@@ -69,7 +70,9 @@ class SizeChartSheet extends StatelessWidget {
             const SizedBox(height: 14),
             Table(
               border: TableBorder(
-                horizontalInside: BorderSide(color: Colors.white.withValues(alpha: 0.1)),
+                horizontalInside: BorderSide(
+                  color: Colors.white.withValues(alpha: 0.1),
+                ),
               ),
               columnWidths: const {
                 0: FlexColumnWidth(1.0),
@@ -82,9 +85,17 @@ class SizeChartSheet extends StatelessWidget {
                 ...sizes.map((s) {
                   final data = rawChart[s] as Map<String, dynamic>? ?? {};
                   final bust = data['bustRange'] ?? '${data["bustCm"] ?? "-"}';
-                  final waist = data['waistRange'] ?? '${data["waistCm"] ?? "-"}';
-                  final len = data['lengthCm'] != null ? '${data["lengthCm"]}' : '-';
-                  return _dataRow(s, bust.toString(), waist.toString(), len.toString());
+                  final waist =
+                      data['waistRange'] ?? '${data["waistCm"] ?? "-"}';
+                  final len = data['lengthCm'] != null
+                      ? '${data["lengthCm"]}'
+                      : '-';
+                  return _dataRow(
+                    s,
+                    bust.toString(),
+                    waist.toString(),
+                    len.toString(),
+                  );
                 }),
               ],
             ),
@@ -104,22 +115,54 @@ class SizeChartSheet extends StatelessWidget {
   }
 
   TableRow _headerRow() {
-    const style = TextStyle(fontWeight: FontWeight.bold, fontSize: 12.5, color: Colors.white70);
-    return const TableRow(children: [
-      Padding(padding: EdgeInsets.symmetric(vertical: 8), child: Text('Size', style: style)),
-      Padding(padding: EdgeInsets.symmetric(vertical: 8), child: Text('Bust range', style: style)),
-      Padding(padding: EdgeInsets.symmetric(vertical: 8), child: Text('Waist range', style: style)),
-      Padding(padding: EdgeInsets.symmetric(vertical: 8), child: Text('Length cm', style: style)),
-    ]);
+    const style = TextStyle(
+      fontWeight: FontWeight.bold,
+      fontSize: 12.5,
+      color: Colors.white70,
+    );
+    return const TableRow(
+      children: [
+        Padding(
+          padding: EdgeInsets.symmetric(vertical: 8),
+          child: Text('Size', style: style),
+        ),
+        Padding(
+          padding: EdgeInsets.symmetric(vertical: 8),
+          child: Text('Bust range', style: style),
+        ),
+        Padding(
+          padding: EdgeInsets.symmetric(vertical: 8),
+          child: Text('Waist range', style: style),
+        ),
+        Padding(
+          padding: EdgeInsets.symmetric(vertical: 8),
+          child: Text('Length cm', style: style),
+        ),
+      ],
+    );
   }
 
   TableRow _dataRow(String size, String bust, String waist, String length) {
     const style = TextStyle(fontSize: 12, color: Colors.white);
-    return TableRow(children: [
-      Padding(padding: const EdgeInsets.symmetric(vertical: 7), child: Text(size, style: style)),
-      Padding(padding: const EdgeInsets.symmetric(vertical: 7), child: Text(bust, style: style)),
-      Padding(padding: const EdgeInsets.symmetric(vertical: 7), child: Text(waist, style: style)),
-      Padding(padding: const EdgeInsets.symmetric(vertical: 7), child: Text(length, style: style)),
-    ]);
+    return TableRow(
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 7),
+          child: Text(size, style: style),
+        ),
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 7),
+          child: Text(bust, style: style),
+        ),
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 7),
+          child: Text(waist, style: style),
+        ),
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 7),
+          child: Text(length, style: style),
+        ),
+      ],
+    );
   }
 }

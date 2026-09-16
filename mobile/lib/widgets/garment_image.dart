@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../models/garment.dart';
 
 class GarmentImage extends StatelessWidget {
@@ -20,7 +21,8 @@ class GarmentImage extends StatelessWidget {
         fit: fit,
         errorBuilder: (context, error, stackTrace) {
           debugPrint('Failed to load asset ${garment.assetImagePath}: $error');
-          if (garment.fallbackImageUrl != null && garment.fallbackImageUrl!.isNotEmpty) {
+          if (garment.fallbackImageUrl != null &&
+              garment.fallbackImageUrl!.isNotEmpty) {
             return Image.network(
               garment.fallbackImageUrl!,
               fit: fit,
@@ -29,7 +31,10 @@ class GarmentImage extends StatelessWidget {
                 return Container(
                   color: Colors.grey.shade900,
                   child: const Center(
-                    child: CircularProgressIndicator(strokeWidth: 2, color: Colors.teal),
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: Colors.teal,
+                    ),
                   ),
                 );
               },
@@ -39,7 +44,8 @@ class GarmentImage extends StatelessWidget {
           return _placeholder();
         },
       );
-    } else if (garment.fallbackImageUrl != null && garment.fallbackImageUrl!.isNotEmpty) {
+    } else if (garment.fallbackImageUrl != null &&
+        garment.fallbackImageUrl!.isNotEmpty) {
       return Image.network(
         garment.fallbackImageUrl!,
         fit: fit,
@@ -48,7 +54,10 @@ class GarmentImage extends StatelessWidget {
           return Container(
             color: Colors.grey.shade900,
             child: const Center(
-              child: CircularProgressIndicator(strokeWidth: 2, color: Colors.teal),
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                color: Colors.teal,
+              ),
             ),
           );
         },

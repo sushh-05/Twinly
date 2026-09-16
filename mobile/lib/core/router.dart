@@ -2,95 +2,62 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../features/account/screen.dart';
-import '../features/onboarding/screen.dart';
 import '../features/avatar/screen.dart';
 import '../features/catalog/screen.dart';
+import '../features/fashion/profile_onboarding_screen.dart';
+import '../features/fashion/saved_looks_screen.dart';
+import '../features/fashion/try_on_screen.dart';
 import '../features/fitting/screen.dart';
-import '../features/styling/screen.dart';
-import '../features/saved_looks/screen.dart';
+import '../features/onboarding/screen.dart';
 import '../features/paywall/screen.dart';
-import '../features/saved_looks/detail_screen.dart';
-import '../core/providers/saved_avatars_state.dart';
+import '../features/settings/screen.dart';
 
 GoRouter createRouter({required String initialLocation}) {
   return GoRouter(
     initialLocation: initialLocation,
     routes: [
-      // Pre-shell flow: not part of the bottom nav
+      GoRoute(path: '/onboarding', builder: (_, _) => const OnboardingScreen()),
       GoRoute(
-        path: '/onboarding',
-        builder: (context, state) => const OnboardingScreen(),
+        path: '/profile',
+        builder: (_, _) => const ProfileOnboardingScreen(),
       ),
-
-      // Main app shell with persistent 4-tab bottom nav
+      GoRoute(path: '/account', builder: (_, _) => const AccountScreen()),
+      GoRoute(path: '/settings', builder: (_, _) => const SettingsScreen()),
+      GoRoute(path: '/account/paywall', builder: (_, _) => const PaywallScreen()),
+      GoRoute(path: '/account/saved', builder: (_, _) => const FashionSavedLooksScreen()),
+      GoRoute(path: '/premium', builder: (_, _) => const PaywallScreen()),
       StatefulShellRoute.indexedStack(
-        builder: (context, state, navigationShell) {
-          return ScaffoldWithNavBar(navigationShell: navigationShell);
-        },
+        builder: (_, _, shell) => ScaffoldWithNavBar(navigationShell: shell),
         branches: [
-          // Tab 1: Avatar
           StatefulShellBranch(
             routes: [
-              GoRoute(
-                path: '/avatar',
-                builder: (context, state) => const AvatarScreen(),
-              ),
+              GoRoute(path: '/avatar', builder: (_, _) => const AvatarScreen()),
             ],
           ),
-          // Tab 2: Catalog (+ styling, pushed on top — not built yet, kept for later)
           StatefulShellBranch(
             routes: [
               GoRoute(
                 path: '/catalog',
-                builder: (context, state) => const CatalogScreen(),
-                routes: [
-                  GoRoute(
-                    path: 'styling',
-                    builder: (context, state) => const StylingScreen(),
-                  ),
-                ],
+                builder: (_, _) => const CatalogScreen(),
               ),
             ],
           ),
-          // Tab 3: Fitting
           StatefulShellBranch(
             routes: [
-              GoRoute(
-                path: '/fitting',
-                builder: (context, state) => const FittingScreen(),
-              ),
+              GoRoute(path: '/try-on', builder: (_, _) => const TryOnScreen()),
             ],
           ),
-          // Tab 4: Account (+ saved looks and paywall, pushed on top — not tabs themselves)
           StatefulShellBranch(
             routes: [
               GoRoute(
-                path: '/account',
-                builder: (context, state) => const AccountScreen(),
-                routes: [
-                  GoRoute(
-                    path: 'saved',
-                    builder: (context, state) => const SavedLooksScreen(),
-                    routes: [
-                      GoRoute(
-                        path: 'detail',
-                        builder: (context, state) {
-                          final entry = state.extra as SavedAvatarEntry;
-                          return SavedLookDetailScreen(entry: entry);
-                        },
-                      ),
-                    ],
-                  ),
-                  GoRoute(
-                    path: 'paywall',
-                    builder: (context, state) => const PaywallScreen(),
-                  ),
-                ],
+                path: '/saved',
+                builder: (_, _) => const FashionSavedLooksScreen(),
               ),
             ],
           ),
         ],
       ),
+      GoRoute(path: '/fitting', builder: (_, _) => const FittingScreen()),
     ],
   );
 }
@@ -106,32 +73,30 @@ class ScaffoldWithNavBar extends StatelessWidget {
       body: navigationShell,
       bottomNavigationBar: NavigationBar(
         selectedIndex: navigationShell.currentIndex,
-        onDestinationSelected: (index) {
-          navigationShell.goBranch(
-            index,
-            initialLocation: index == navigationShell.currentIndex,
-          );
-        },
+        onDestinationSelected: (index) => navigationShell.goBranch(
+          index,
+          initialLocation: index == navigationShell.currentIndex,
+        ),
         destinations: const [
           NavigationDestination(
-            icon: Icon(Icons.accessibility_new_outlined),
-            selectedIcon: Icon(Icons.accessibility_new),
+            icon: Icon(Icons.auto_awesome_outlined),
+            selectedIcon: Icon(Icons.auto_awesome),
             label: 'Avatar',
           ),
           NavigationDestination(
-            icon: Icon(Icons.checkroom_outlined),
-            selectedIcon: Icon(Icons.checkroom),
+            icon: Icon(Icons.grid_view_outlined),
+            selectedIcon: Icon(Icons.grid_view),
             label: 'Catalog',
           ),
           NavigationDestination(
-            icon: Icon(Icons.checklist_outlined),
-            selectedIcon: Icon(Icons.checklist),
-            label: 'Fitting',
+            icon: Icon(Icons.camera_alt_outlined),
+            selectedIcon: Icon(Icons.camera_alt),
+            label: 'Try On',
           ),
           NavigationDestination(
-            icon: Icon(Icons.person_outline),
-            selectedIcon: Icon(Icons.person),
-            label: 'Account',
+            icon: Icon(Icons.bookmark_border),
+            selectedIcon: Icon(Icons.bookmark),
+            label: 'Saved Looks',
           ),
         ],
       ),

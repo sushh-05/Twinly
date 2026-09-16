@@ -1,4 +1,4 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter/foundation.dart';
 
 import '../providers/avatar_state.dart';
 
@@ -26,23 +26,18 @@ class SavedAvatarEntry {
   }
 }
 
-class SavedAvatarsNotifier extends Notifier<List<SavedAvatarEntry>> {
-  @override
-  List<SavedAvatarEntry> build() => [];
+class SavedAvatarsState extends ChangeNotifier {
+  List<SavedAvatarEntry> entries = [];
 
   // Returns true if a matching entry already existed (caller shows the
   // "save as new copy or skip?" prompt); always call forceSave() after
   // the user's choice — this method itself never blocks on the check.
   bool hasDuplicate(SavedAvatarEntry candidate) {
-    return state.any((e) => e.matches(candidate));
+    return entries.any((e) => e.matches(candidate));
   }
 
   void forceSave(SavedAvatarEntry entry) {
-    state = [...state, entry];
+    entries = [...entries, entry];
+    notifyListeners();
   }
 }
-
-final savedAvatarsProvider =
-    NotifierProvider<SavedAvatarsNotifier, List<SavedAvatarEntry>>(
-      SavedAvatarsNotifier.new,
-    );

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/providers/garment_state.dart';
@@ -8,14 +8,14 @@ import '../../models/garment.dart';
 import '../../widgets/garment_image.dart';
 import 'dress_details_screen.dart';
 
-class CatalogScreen extends ConsumerStatefulWidget {
+class CatalogScreen extends StatefulWidget {
   const CatalogScreen({super.key});
 
   @override
-  ConsumerState<CatalogScreen> createState() => _CatalogScreenState();
+  State<CatalogScreen> createState() => _CatalogScreenState();
 }
 
-class _CatalogScreenState extends ConsumerState<CatalogScreen> {
+class _CatalogScreenState extends State<CatalogScreen> {
   String _selectedCategory = 'All Dresses';
   String _selectedBrand = 'All';
   String _searchQuery = '';
@@ -52,11 +52,15 @@ class _CatalogScreenState extends ConsumerState<CatalogScreen> {
       case 'A-Line':
         return sil.contains('a-line') || name.contains('a-line');
       case 'Party & Satin':
-        return mat.contains('satin') || name.contains('satin') || name.contains('party');
+        return mat.contains('satin') ||
+            name.contains('satin') ||
+            name.contains('party');
       case 'Floral':
         return name.contains('floral') || desc.contains('floral');
       case 'Casual Poplin':
-        return mat.contains('poplin') || mat.contains('cotton') || name.contains('poplin');
+        return mat.contains('poplin') ||
+            mat.contains('cotton') ||
+            name.contains('poplin');
       default:
         return true;
     }
@@ -64,15 +68,19 @@ class _CatalogScreenState extends ConsumerState<CatalogScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final catalog = ref.watch(remoteGarmentsProvider);
+    final catalog = context.watch<CatalogState>();
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     final bgColor = isDark ? Colors.black : const Color(0xFFF7F8FA);
     final cardBgColor = isDark ? const Color(0xFF161616) : Colors.white;
     final textPrimary = isDark ? Colors.white : const Color(0xFF1F2937);
     final textSecondary = isDark ? Colors.white54 : const Color(0xFF6B7280);
-    final chipUnselectedBg = isDark ? const Color(0xFF1C1C20) : const Color(0xFFE5E7EB);
-    final chipUnselectedText = isDark ? Colors.white70 : const Color(0xFF374151);
+    final chipUnselectedBg = isDark
+        ? const Color(0xFF1C1C20)
+        : const Color(0xFFE5E7EB);
+    final chipUnselectedText = isDark
+        ? Colors.white70
+        : const Color(0xFF374151);
 
     return Scaffold(
       backgroundColor: bgColor,
@@ -143,11 +151,11 @@ class _CatalogScreenState extends ConsumerState<CatalogScreen> {
               isDark ? Icons.light_mode_outlined : Icons.dark_mode_outlined,
               color: isDark ? Colors.amber : Colors.indigo.shade700,
             ),
-            onPressed: () => ref.read(themeModeProvider.notifier).toggle(),
+            onPressed: () => context.read<ThemeModeState>().toggle(),
           ),
           IconButton(
             icon: Icon(Icons.refresh, color: textSecondary, size: 20),
-            onPressed: () => ref.invalidate(remoteGarmentsProvider),
+            onPressed: () => context.read<CatalogState>().load(),
           ),
         ],
       ),
@@ -170,7 +178,9 @@ class _CatalogScreenState extends ConsumerState<CatalogScreen> {
                     cat,
                     style: TextStyle(
                       color: isSelected ? Colors.white : chipUnselectedText,
-                      fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                      fontWeight: isSelected
+                          ? FontWeight.bold
+                          : FontWeight.w500,
                       fontSize: 12,
                     ),
                   ),
@@ -180,7 +190,9 @@ class _CatalogScreenState extends ConsumerState<CatalogScreen> {
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(18),
                     side: BorderSide(
-                      color: isSelected ? Colors.teal.shade700 : Colors.transparent,
+                      color: isSelected
+                          ? Colors.teal.shade700
+                          : Colors.transparent,
                     ),
                   ),
                   padding: const EdgeInsets.symmetric(horizontal: 4),
@@ -214,7 +226,9 @@ class _CatalogScreenState extends ConsumerState<CatalogScreen> {
                     brand,
                     style: TextStyle(
                       color: isSelected ? Colors.black : chipUnselectedText,
-                      fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                      fontWeight: isSelected
+                          ? FontWeight.bold
+                          : FontWeight.w500,
                       fontSize: 11.5,
                     ),
                   ),
@@ -224,7 +238,9 @@ class _CatalogScreenState extends ConsumerState<CatalogScreen> {
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(16),
                     side: BorderSide(
-                      color: isSelected ? Colors.teal.shade300 : Colors.transparent,
+                      color: isSelected
+                          ? Colors.teal.shade300
+                          : Colors.transparent,
                     ),
                   ),
                   padding: const EdgeInsets.symmetric(horizontal: 4),
@@ -241,103 +257,114 @@ class _CatalogScreenState extends ConsumerState<CatalogScreen> {
 
           // Garments Grid
           Expanded(
-            child: catalog.when(
-              loading: () => const Center(
-                child: CircularProgressIndicator(color: Colors.teal),
-              ),
-              error: (err, stack) => Center(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      'Unable to load the catalog.',
-                      style: TextStyle(color: textSecondary),
-                    ),
-                    const SizedBox(height: 8),
-                    TextButton(
-                      onPressed: () => ref.invalidate(remoteGarmentsProvider),
-                      child: const Text('Retry', style: TextStyle(color: Colors.teal)),
-                    ),
-                  ],
-                ),
-              ),
-              data: (catalogState) {
-                final filtered = catalogState.garments.where((g) {
-                  final matchesCat = _matchesCategory(g, _selectedCategory);
-                  final matchesBrand = _selectedBrand == 'All' ||
-                      (g.brand ?? '').toLowerCase() == _selectedBrand.toLowerCase();
-                  final matchesSearch = _searchQuery.isEmpty ||
-                      g.name.toLowerCase().contains(_searchQuery.toLowerCase()) ||
-                      (g.brand ?? '').toLowerCase().contains(_searchQuery.toLowerCase()) ||
-                      (g.silhouette ?? '').toLowerCase().contains(_searchQuery.toLowerCase()) ||
-                      (g.fabricMaterial ?? '').toLowerCase().contains(_searchQuery.toLowerCase());
-                  return matchesCat && matchesBrand && matchesSearch;
-                }).toList();
+            child: catalog.loading
+                ? const Center(
+                    child: CircularProgressIndicator(color: Colors.teal),
+                  )
+                : Builder(
+                    builder: (context) {
+                      final catalogState = catalog;
+                      final filtered = catalogState.garments.where((g) {
+                        final matchesCat = _matchesCategory(
+                          g,
+                          _selectedCategory,
+                        );
+                        final matchesBrand =
+                            _selectedBrand == 'All' ||
+                            (g.brand ?? '').toLowerCase() ==
+                                _selectedBrand.toLowerCase();
+                        final matchesSearch =
+                            _searchQuery.isEmpty ||
+                            g.name.toLowerCase().contains(
+                              _searchQuery.toLowerCase(),
+                            ) ||
+                            (g.brand ?? '').toLowerCase().contains(
+                              _searchQuery.toLowerCase(),
+                            ) ||
+                            (g.silhouette ?? '').toLowerCase().contains(
+                              _searchQuery.toLowerCase(),
+                            ) ||
+                            (g.fabricMaterial ?? '').toLowerCase().contains(
+                              _searchQuery.toLowerCase(),
+                            );
+                        return matchesCat && matchesBrand && matchesSearch;
+                      }).toList();
 
-                if (filtered.isEmpty) {
-                  return Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Image.asset(
-                          'assets/images/empty_state.png',
-                          width: 120,
-                          height: 120,
-                          errorBuilder: (context, error, stackTrace) =>
-                              Icon(Icons.search_off, size: 60, color: textSecondary),
-                        ),
-                        const SizedBox(height: 14),
-                        Text(
-                          'No dresses found',
-                          style: TextStyle(
-                            color: textPrimary,
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          'Try choosing another category, brand, or search.',
-                          style: TextStyle(color: textSecondary, fontSize: 13),
-                        ),
-                      ],
-                    ),
-                  );
-                }
-
-                return GridView.builder(
-                  padding: const EdgeInsets.fromLTRB(14, 2, 14, 20),
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                    mainAxisSpacing: 14,
-                    crossAxisSpacing: 14,
-                    childAspectRatio: 0.49,
-                  ),
-                  itemCount: filtered.length,
-                  itemBuilder: (context, index) {
-                    final garment = filtered[index];
-                    return _GarmentCard(
-                      garment: garment,
-                      cardBgColor: cardBgColor,
-                      textPrimary: textPrimary,
-                      textSecondary: textSecondary,
-                      isDark: isDark,
-                      onTap: () {
-                        Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (_) => DressDetailsScreen(garment: garment),
+                      if (filtered.isEmpty) {
+                        return Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Image.asset(
+                                'assets/images/empty_state.png',
+                                width: 120,
+                                height: 120,
+                                errorBuilder: (context, error, stackTrace) =>
+                                    Icon(
+                                      Icons.search_off,
+                                      size: 60,
+                                      color: textSecondary,
+                                    ),
+                              ),
+                              const SizedBox(height: 14),
+                              Text(
+                                'No dresses found',
+                                style: TextStyle(
+                                  color: textPrimary,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                'Try choosing another category, brand, or search.',
+                                style: TextStyle(
+                                  color: textSecondary,
+                                  fontSize: 13,
+                                ),
+                              ),
+                            ],
                           ),
                         );
-                      },
-                      onTryOn: () {
-                        ref.read(selectedGarmentProvider.notifier).select(garment);
-                        context.go('/fitting');
-                      },
-                    );
-                  },
-                );
-              },
-            ),
+                      }
+
+                      return GridView.builder(
+                        padding: const EdgeInsets.fromLTRB(14, 2, 14, 20),
+                        gridDelegate:
+                            const SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: 2,
+                              mainAxisSpacing: 14,
+                              crossAxisSpacing: 14,
+                              childAspectRatio: 0.49,
+                            ),
+                        itemCount: filtered.length,
+                        itemBuilder: (context, index) {
+                          final garment = filtered[index];
+                          return _GarmentCard(
+                            garment: garment,
+                            cardBgColor: cardBgColor,
+                            textPrimary: textPrimary,
+                            textSecondary: textSecondary,
+                            isDark: isDark,
+                            onTap: () {
+                              Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (_) =>
+                                      DressDetailsScreen(garment: garment),
+                                ),
+                              );
+                            },
+                            onTryOn: () {
+                              context.read<SelectedGarmentState>().select(
+                                garment,
+                              );
+                              context.go('/fitting');
+                            },
+                          );
+                        },
+                      );
+                    },
+                  ),
           ),
         ],
       ),
@@ -382,7 +409,9 @@ class _GarmentCardState extends State<_GarmentCard> {
           color: widget.cardBgColor,
           borderRadius: BorderRadius.circular(14),
           border: Border.all(
-            color: widget.isDark ? Colors.white10 : Colors.black.withValues(alpha: 0.08),
+            color: widget.isDark
+                ? Colors.white10
+                : Colors.black.withValues(alpha: 0.08),
           ),
           boxShadow: [
             BoxShadow(
@@ -430,7 +459,10 @@ class _GarmentCardState extends State<_GarmentCard> {
                     bottom: 8,
                     left: 8,
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 6,
+                        vertical: 3,
+                      ),
                       decoration: BoxDecoration(
                         color: Colors.teal.shade700,
                         borderRadius: BorderRadius.circular(8),
@@ -445,7 +477,11 @@ class _GarmentCardState extends State<_GarmentCard> {
                       child: const Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Icon(Icons.check_circle, size: 11, color: Colors.white),
+                          Icon(
+                            Icons.check_circle,
+                            size: 11,
+                            color: Colors.white,
+                          ),
                           SizedBox(width: 3),
                           Text(
                             'Verified size chart',

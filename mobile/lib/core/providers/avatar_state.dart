@@ -1,7 +1,8 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter/foundation.dart';
 
 class AvatarMeasurements {
   final double height;
+  final double shoulderWidth;
   final double chest;
   final double waist;
   final double hip;
@@ -13,6 +14,7 @@ class AvatarMeasurements {
 
   const AvatarMeasurements({
     required this.height,
+    this.shoulderWidth = 40,
     required this.chest,
     required this.waist,
     required this.hip,
@@ -25,6 +27,7 @@ class AvatarMeasurements {
 
   AvatarMeasurements copyWith({
     double? height,
+    double? shoulderWidth,
     double? chest,
     double? waist,
     double? hip,
@@ -36,6 +39,7 @@ class AvatarMeasurements {
   }) {
     return AvatarMeasurements(
       height: height ?? this.height,
+      shoulderWidth: shoulderWidth ?? this.shoulderWidth,
       chest: chest ?? this.chest,
       waist: waist ?? this.waist,
       hip: hip ?? this.hip,
@@ -69,31 +73,34 @@ class AvatarMeasurements {
   }
 }
 
-class AvatarMeasurementsNotifier extends Notifier<AvatarMeasurements> {
-  @override
+class AvatarMeasurementsState extends ChangeNotifier {
+  AvatarMeasurements value = AvatarMeasurements.defaultsFor(isFeminine: true);
+
+  AvatarMeasurements get state => value;
+
+  AvatarMeasurementsState();
+  void _set(AvatarMeasurements next) {
+    value = next;
+    notifyListeners();
+  }
+
   AvatarMeasurements build() {
     // Starting default — Sign up screen will overwrite this with the
     // chosen gender's defaults right after the user picks it.
-    return AvatarMeasurements.defaultsFor(isFeminine: true);
+    return value;
   }
 
-  void setHeight(double v) =>
-      state = state.copyWith(height: v, inseam: v * 0.45);
-  void setChest(double v) => state = state.copyWith(chest: v);
-  void setWaist(double v) => state = state.copyWith(waist: v);
-  void setHip(double v) => state = state.copyWith(hip: v);
-  void setInseam(double v) => state = state.copyWith(inseam: v);
-  void setMeasurements(AvatarMeasurements value) => state = value;
+  void setHeight(double v) => _set(value.copyWith(height: v, inseam: v * 0.45));
+  void setChest(double v) => _set(value.copyWith(chest: v));
+  void setWaist(double v) => _set(value.copyWith(waist: v));
+  void setHip(double v) => _set(value.copyWith(hip: v));
+  void setInseam(double v) => _set(value.copyWith(inseam: v));
+  void setMeasurements(AvatarMeasurements next) => _set(next);
 
   // Called from the gender toggle on the Avatar screen — resets to that
   // gender's sensible defaults, since switching gender means switching
   // to a different person, not just relabeling the same numbers.
   void setGender(bool isFeminine) {
-    state = AvatarMeasurements.defaultsFor(isFeminine: isFeminine);
+    _set(AvatarMeasurements.defaultsFor(isFeminine: isFeminine));
   }
 }
-
-final avatarMeasurementsProvider =
-    NotifierProvider<AvatarMeasurementsNotifier, AvatarMeasurements>(
-      AvatarMeasurementsNotifier.new,
-    );

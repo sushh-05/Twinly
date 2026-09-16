@@ -1,4 +1,4 @@
-package com.example.fit_style_app
+package com.teamsapphire.twinlyapp
 
 import io.flutter.embedding.android.FlutterActivity
 

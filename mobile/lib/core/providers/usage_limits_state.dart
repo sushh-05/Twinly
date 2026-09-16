@@ -1,4 +1,4 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class UsageLimits {
@@ -16,29 +16,31 @@ class UsageLimits {
   static const freeSavesLimit = 1;
 }
 
-class UsageLimitsNotifier extends Notifier<UsageLimits> {
+class UsageLimitsState extends ChangeNotifier {
   static const _keyTries = 'usage_tries';
   static const _keySaves = 'usage_saves';
   static const _keyLastGarment = 'usage_last_garment';
 
-  @override
-  UsageLimits build() {
+  UsageLimits value = const UsageLimits(
+    triesUsed: 0,
+    savesUsed: 0,
+    lastCountedGarmentId: null,
+  );
+  UsageLimits get state => value;
+
+  UsageLimitsState() {
     // Synchronous default; refreshed from disk right after via _loadFromDisk().
     Future.microtask(_loadFromDisk);
-    return const UsageLimits(
-      triesUsed: 0,
-      savesUsed: 0,
-      lastCountedGarmentId: null,
-    );
   }
 
   Future<void> _loadFromDisk() async {
     final prefs = await SharedPreferences.getInstance();
-    state = UsageLimits(
+    value = UsageLimits(
       triesUsed: prefs.getInt(_keyTries) ?? 0,
       savesUsed: prefs.getInt(_keySaves) ?? 0,
       lastCountedGarmentId: prefs.getString(_keyLastGarment),
     );
+    notifyListeners();
   }
 
   // Call when a NEW distinct garment reaches Fitting. No-ops if this
@@ -50,18 +52,19 @@ class UsageLimitsNotifier extends Notifier<UsageLimits> {
   }) async {
     if (garmentId == state.lastCountedGarmentId) return;
     if (isPremium) {
-      state = UsageLimits(
+      value = UsageLimits(
         triesUsed: state.triesUsed,
         savesUsed: state.savesUsed,
         lastCountedGarmentId: garmentId,
       );
+      notifyListeners();
       return;
     }
     final prefs = await SharedPreferences.getInstance();
     final newTries = state.triesUsed + 1;
     await prefs.setInt(_keyTries, newTries);
     await prefs.setString(_keyLastGarment, garmentId);
-    state = UsageLimits(
+    value = UsageLimits(
       triesUsed: newTries,
       savesUsed: state.savesUsed,
       lastCountedGarmentId: garmentId,
@@ -72,18 +75,14 @@ class UsageLimitsNotifier extends Notifier<UsageLimits> {
     final prefs = await SharedPreferences.getInstance();
     final newSaves = state.savesUsed + 1;
     await prefs.setInt(_keySaves, newSaves);
-    state = UsageLimits(
+    value = UsageLimits(
       triesUsed: state.triesUsed,
       savesUsed: newSaves,
       lastCountedGarmentId: state.lastCountedGarmentId,
     );
+    notifyListeners();
   }
 }
-
-final usageLimitsProvider = NotifierProvider<UsageLimitsNotifier, UsageLimits>(
-  UsageLimitsNotifier.new,
-);
-
 // Stub for now — wire to RevenueCat's customer info / entitlement check
 // once the dashboard is set up. Everything else reads this, so swapping
 // the implementation later doesn't touch any calling code.
@@ -91,13 +90,3 @@ final usageLimitsProvider = NotifierProvider<UsageLimitsNotifier, UsageLimits>(
 // TEMP: forcing premium on for development so the team can test try-ons
 // and saves without hitting limits. MUST be reverted before any real
 // testing of the free-tier flow, and definitely before submission.
-class IsPremiumNotifier extends Notifier<bool> {
-  @override
-  bool build() => false;
-
-  void setPremium(bool value) => state = value;
-}
-
-final isPremiumProvider = NotifierProvider<IsPremiumNotifier, bool>(
-  IsPremiumNotifier.new,
-);

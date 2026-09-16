@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/data/garment_catalog.dart';
 import '../../core/providers/saved_avatars_state.dart';
 
-class SavedLooksScreen extends ConsumerWidget {
+class SavedLooksScreen extends StatelessWidget {
   const SavedLooksScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final savedLooks = ref.watch(savedAvatarsProvider);
+  Widget build(BuildContext context) {
+    final savedLooks = context.watch<SavedAvatarsState>().entries;
 
     return Scaffold(
       appBar: AppBar(title: const Text('Saved looks')),
