@@ -1,121 +1,64 @@
-# Twinly
+# Twinly Flutter app
 
-## Shipaton setup
+This directory contains the Android-first Flutter client. The package ID is `com.teamsapphire.twinlyapp`.
 
-Prerequisites: Flutter stable, Android Studio/Android SDK, Node.js, Firebase CLI, and FlutterFire CLI.
+For full repository setup, Firebase, RevenueCat, backend, and teammate instructions, read the [repository README](../README.md).
 
-```powershell
-npm install -g firebase-tools
-firebase login
-dart pub global activate flutterfire_cli
-flutterfire configure
-```
-
-In Firebase Console, create/select the Twinly project, register Android package `com.teamsapphire.twinlyapp`, enable Authentication and Email/Password, and confirm `lib/firebase_options.dart` was generated. Never hand-edit credentials into source.
-
-In RevenueCat, create the Twinly project, add Android package `com.teamsapphire.twinlyapp`, create entitlement `premium_access`, connect the Google Play subscription product, add it to the current offering, and copy only the public Android SDK key.
-
-Development:
+## Quick start: UI/demo mode
 
 ```powershell
-flutter run --dart-define=DEMO_MODE=false --dart-define=USE_REVENUECAT=true --dart-define=RC_ANDROID_API_KEY=PUBLIC_ANDROID_SDK_KEY
+flutter pub get
+flutter devices
+flutter run -d <ANDROID_DEVICE_ID> `
+  --dart-define=DEMO_MODE=true `
+  --dart-define=USE_REVENUECAT=false
 ```
 
-The fashion backend URL defaults to `http://localhost:3000`. Override it with `--dart-define=API_BASE_URL=http://10.0.2.2:4000` for an Android emulator or your computer's LAN URL for a physical device.
+Demo mode keeps the UI runnable without Firebase or RevenueCat credentials. It does not perform real purchases.
 
-Demo UI:
+## RevenueCat Test Store mode
+
+Run on Android, not Chrome/web:
 
 ```powershell
-flutter run --dart-define=DEMO_MODE=true --dart-define=USE_REVENUECAT=false
+flutter run -d <ANDROID_DEVICE_ID> `
+  --dart-define=DEMO_MODE=false `
+  --dart-define=USE_REVENUECAT=true `
+  --dart-define=RC_ANDROID_API_KEY=test_YOUR_PUBLIC_ANDROID_KEY
 ```
 
-Release (requires real Firebase configuration and a release signing key):
+The existing RevenueCat entitlement is `twinly_pro`. The Monthly, Yearly, and Lifetime products must be attached to the current offering in RevenueCat.
+
+## Fashion API mode
+
+Start the Express API from the repository root with `npm run dev` in `server/`, then use:
 
 ```powershell
-flutter build appbundle --release --dart-define=DEMO_MODE=false --dart-define=USE_REVENUECAT=true --dart-define=RC_ANDROID_API_KEY=PUBLIC_ANDROID_SDK_KEY
+flutter run -d <ANDROID_DEVICE_ID> `
+  --dart-define=API_BASE_URL=http://10.0.2.2:4000 `
+  --dart-define=DEMO_MODE=true `
+  --dart-define=USE_REVENUECAT=false
 ```
 
-Manual checklist: create an account, log out/in, reset password, restart for session persistence, load Premium packages, perform a license-test purchase, verify `premium_access`, restore purchases, test privacy/support links, and test deletion.
+Use the computer's LAN IP instead of `10.0.2.2` on a physical phone.
 
-Play Console checklist: store listing, closed testing, testers, privacy policy, Data Safety, app access instructions, subscription activation, and license testers.
+## App structure
 
-Account deletion TODO: once profile records, saved looks, and uploaded media exist, delete those records/media before deleting the Firebase account.
+- `lib/main.dart`: Firebase, RevenueCat, and provider registration.
+- `lib/core/router.dart`: onboarding, settings, and four-tab navigation.
+- `lib/features/avatar/`: slider/mannequin avatar editor.
+- `lib/features/catalog/` and `lib/core/data/garment_catalog.dart`: restored dress catalog.
+- `lib/features/fashion/`: profile onboarding, fashion catalog, try-on, and saved-look flows.
+- `lib/features/paywall/`: RevenueCat purchase and restore UI.
+- `lib/features/settings/`: dedicated Settings entry point.
+- `lib/services/`: authentication, RevenueCat, fashion API, and persisted fashion state.
 
-Supply these values manually through `--dart-define`: `SUPPORT_EMAIL`, `PRIVACY_POLICY_URL`, and `DELETE_ACCOUNT_URL`. Do not commit keys, service-account JSON, or signing material.
+## Validation
 
-# fit_style_app
+```powershell
+dart format lib test
+flutter analyze
+flutter test
+```
 
-A new Flutter project.
-
-## Getting Started
-
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
-
-
-
-# App spec — measurements, navigation, and saved avatars
-
-## 1. Core measurement state
-
-- One shared `AvatarMeasurements` object: `height`, `chest`, `waist`, `hip`, `inseam`, `isFeminine`.
-- Implemented as a Riverpod `Notifier` (not the older `StateNotifier`) — matches `flutter_riverpod: ^3.4.1`.
-- `setHeight()` auto-recalculates `inseam = height * 0.45`.
-- `isFeminine` matches the existing `BodyPainter`'s expected field — no renaming needed there.
-- **Gender toggle behavior**: `setGender()` replaces the *entire* measurement object with that gender's defaults. It does **not** preserve previously customized numbers — switching gender is treated as switching to a different person, not relabeling the same body. Confirmed and accepted.
-- This state is the single source of truth read by the Avatar screen, Catalog (where relevant), Fitting screen, and the Fitting tab's "last result."
-
-## 2. Bottom navigation — 4 tabs, always reachable
-
-| Tab | Purpose |
-|---|---|
-| Avatar | Sliders + gender toggle — editable anytime, for anyone |
-| Catalog | Browse dresses |
-| Fitting | Last try-on result — updates each time the user tries something on |
-| Account | Subscription status, upgrade button, saved looks (if premium), log out |
-
-## 3. Signup
-
-- Fields collected once: **gender, email, name**. No phone number.
-- The gender picked at signup immediately loads that gender's default measurements into the Avatar tab.
-
-## 4. Free vs. premium limits
-
-Two separate, independent limits on the free tier:
-
-- **Try-on views**: 3 lifetime views total (Fitting results).
-- **Saves**: of those, only **1** can be kept as a persistent saved entry.
-- These limits are independent — using up try-on views does not affect the save limit, and vice versa.
-- **Premium**: unlimited try-on views, unlimited saves.
-- **Share**: explicitly out of scope for now.
-
-## 5. Saved-avatar feature
-
-- Saving takes a **snapshot** of the current state at the moment of saving — it is not live-linked. Later changes to the working avatar (including gender toggles) do not retroactively affect anything already saved.
-- A saved entry is **re-rendered live** every time it's opened (body shape + dress drawn fresh from data) — no image is ever stored.
-- A saved entry stores exactly:
-  - The 6 measurement fields
-  - A name (e.g. "Me", "Brother")
-  - A garment reference (an ID/key identifying the dress — not the dress's image)
-- Garment selection happens on the **Catalog** page and flows into the **Fitting** page, where the save action itself occurs and the garment reference is attached.
-- **Free tier**: 1 save allowed, free. A 2nd save attempt is hard-blocked with an upgrade prompt. The 1st saved entry is never touched or overwritten by this.
-- **Premium tier**: unlimited saves. Each save creates a new, separate entry — never overwrites an existing one.
-- **Duplicate check**: before creating a new entry, compare name + measurements + garment reference against all existing saved entries.
-  - If **all three** match an existing entry exactly → prompt: "Already saved — save as a new copy, or skip?"
-  - If **any** of the three differs → save silently as a new entry, no prompt.
-
-## Not yet decided / not yet built
-
-- Catalog and Fitting pages themselves don't exist yet — no screens, no garment-selection state, no "currently selected dress" provider.
-- No `savedAvatarsProvider` (or equivalent list-of-saved-entries state) has been designed or written yet.
-- No tier-check (free vs. premium) logic has been designed yet — only the behavior it needs to enforce.
-- No code has been written for the saved-avatar decisions — everything above is spec only.
+Do not commit `.env` files, API keys, RevenueCat secret keys, service-account JSON, keystores, or signing credentials.
