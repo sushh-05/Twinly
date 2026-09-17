@@ -1,10 +1,11 @@
 require('dotenv').config({ path: require('path').join(__dirname, '..', '.env') });
 require('dotenv').config({ path: require('path').join(__dirname, '..', '..', '.env') });
-const express = require('express'); const cors = require('cors'); const multer = require('multer'); const fs = require('fs'); const path = require('path'); const { analyzeGarmentImage, analyzeGarmentUrl, generateStyleImage } = require('./providers');
+const express = require('express'); const cors = require('cors'); const multer = require('multer'); const fs = require('fs'); const path = require('path'); const { analyzeGarmentImage, analyzeGarmentUrl, generateStyleImage } = require('./providers'); const { requireFirebaseUser } = require('./firebase_auth');
 const app = express(); const upload = multer({ storage: multer.memoryStorage() }); app.use(cors()); app.use(express.json({ limit: '2mb' }));
-const dataDir = path.join(__dirname, '..', 'data'); fs.mkdirSync(dataDir, { recursive: true }); const save = (name, value) => fs.writeFileSync(path.join(dataDir, name), JSON.stringify(value, null, 2));
+const dataDir = path.join(__dirname, '..', 'data'); const profilesDir = path.join(dataDir, 'profiles'); fs.mkdirSync(profilesDir, { recursive: true }); const profilePath = (uid) => path.join(profilesDir, `${encodeURIComponent(uid)}.json`); const saveProfile = (uid, value) => fs.writeFileSync(profilePath(uid), JSON.stringify({ uid, profile: value }, null, 2));
 app.get('/health', (req, res) => res.json({ status: 'ok', service: 'twinly-express' })); app.get('/api/health', (req, res) => res.json({ status: 'ok' }));
-app.post('/api/profile', (req, res) => { save('profile.json', req.body); res.json({ ok: true, profile: req.body }); });
+app.post('/api/profile', requireFirebaseUser, (req, res) => { saveProfile(req.firebaseUser.uid, req.body); res.json({ ok: true, profile: req.body }); });
+app.delete('/api/account', requireFirebaseUser, (req, res) => { const file = profilePath(req.firebaseUser.uid); try { if (fs.existsSync(file)) fs.unlinkSync(file); return res.json({ ok: true }); } catch (error) { console.error('Profile deletion failed:', error.message); return res.status(500).json({ error: 'Profile deletion failed.' }); } });
 app.post('/api/garment/analyze', upload.single('image'), async (req, res) => { try { const garment = req.file ? await analyzeGarmentImage(req.file.buffer, req.file.mimetype) : await analyzeGarmentUrl(req.body.url); res.json({ garment }); } catch (e) { res.status(422).json({ error: e.message || 'We could not read that garment. Please upload a screenshot instead.' }); } });
 app.post('/api/tryon/generate', upload.fields([{ name: 'humanImage', maxCount: 1 }, { name: 'garmentImage', maxCount: 1 }]), async (req, res) => {
     try {

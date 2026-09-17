@@ -8,6 +8,7 @@ import '../../core/providers/user_profile_state.dart';
 import '../../widgets/avatar_profile_sheet.dart';
 import '../../config/app_config.dart';
 import '../../services/auth_service.dart';
+import '../../services/account_deletion_service.dart';
 import '../../services/revenuecat_service.dart';
 
 import 'package:provider/provider.dart';
@@ -680,18 +681,51 @@ class AccountScreen extends StatelessWidget {
       ),
     );
     if (second != true || !context.mounted) return;
-    try {
-      if (!AppConfig.demoMode) await AuthService().deleteAccount();
-      if (!context.mounted) return;
-      await context.read<UserProfileState>().clear();
-      if (context.mounted) context.go('/onboarding');
-    } catch (error) {
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(AuthService.friendlyError(error))),
-        );
-      }
+    final deletion = AccountDeletionService();
+    var result = await deletion.deleteAccount(demoMode: AppConfig.demoMode);
+    if (!context.mounted) return;
+    if (result.requiresReauthentication) {
+      final password = await _requestDeletionPassword(context);
+      if (!context.mounted || password == null) return;
+      result = await deletion.deleteAccount(
+        demoMode: AppConfig.demoMode,
+        reauthenticationPassword: password,
+      );
     }
+    if (!context.mounted) return;
+    if (result.isComplete) {
+      context.go('/onboarding');
+      return;
+    }
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(result.errors.join(' '))),
+    );
+  }
+
+  Future<String?> _requestDeletionPassword(BuildContext context) {
+    final controller = TextEditingController();
+    return showDialog<String>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Confirm account deletion'),
+        content: TextField(
+          controller: controller,
+          obscureText: true,
+          autofocus: true,
+          decoration: const InputDecoration(labelText: 'Firebase password'),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(dialogContext, controller.text),
+            child: const Text('Confirm'),
+          ),
+        ],
+      ),
+    ).whenComplete(controller.dispose);
   }
 
   Future<void> _openLink(BuildContext context, String value) async {

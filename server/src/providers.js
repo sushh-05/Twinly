@@ -1,39 +1,5 @@
 const axios = require('axios'); const cheerio = require('cheerio'); const { client } = require('@gradio/client');
-const Replicate = require('replicate');
-const FormData = require('form-data');
-
-const replicate = new Replicate({ auth: process.env.REPLICATE_API_TOKEN });
-
 const fallback = { category: 'dress', color: 'soft neutral', pattern: 'solid', sleeveLength: 'short', neckline: 'round', styleNotes: 'clean, everyday style' };
-
-async function uploadBufferToPublicUrl(buffer, filename) {
-  const form = new FormData();
-  form.append('reqtype', 'fileupload');
-  form.append('fileToUpload', buffer, filename);
-  const res = await axios.post('https://catbox.moe/user/api.php', form, {
-    headers: form.getHeaders()
-  });
-  return res.data; // returns the raw URL string
-}
-
-async function generateVirtualTryOnReplicate(humanImageUrl, garmentImageUrl, garmentDescription) {
-  try {
-    const output = await replicate.run(
-      "cuuupid/idm-vton:0513734a452173b8173e907e3a59d19a36266e55b48528559432bd21c7d7e985",
-      {
-        input: {
-          garm_img: garmentImageUrl,
-          human_img: humanImageUrl,
-          garment_des: garmentDescription || "a garment"
-        }
-      }
-    );
-    return output.url ? output.url() : (Array.isArray(output) ? output[0] : output);
-  } catch (e) {
-    console.error('Replicate IDM-VTON error:', e.message);
-    return null;
-  }
-}
 async function analyzeGarmentImage(imageBuffer, mimeType = 'image/jpeg') {
   // Swappable provider function: replace this Hugging Face call if a free-tier provider changes.
   if (!process.env.HUGGINGFACE_API_KEY) return fallback;
@@ -107,24 +73,8 @@ async function analyzeGarmentUrl(url) {
 async function generateStyleImage(prompt, humanImageBuffer, garmentImageBuffer, garment) {
   const garmentDesc = `${garment?.color || ''} ${garment?.category || ''} ${garment?.styleNotes || ''}`.trim();
 
-  // 1. Try Replicate first if we have both images and a token
-  if (process.env.REPLICATE_API_TOKEN && humanImageBuffer && garmentImageBuffer) {
-    try {
-      console.log('Attempting Replicate IDM-VTON generation...');
-      const humanUrl = await uploadBufferToPublicUrl(humanImageBuffer, 'human.jpg');
-      const garmentUrl = await uploadBufferToPublicUrl(garmentImageBuffer, 'garment.jpg');
-
-      const resultUrl = await generateVirtualTryOnReplicate(humanUrl, garmentUrl, garmentDesc);
-      if (resultUrl) {
-        console.log('Replicate generation successful');
-        return resultUrl;
-      }
-    } catch (e) {
-      console.error('Replicate fallback error:', e.message);
-    }
-  }
-
-  // 2. Try IDM-VTON Space next
+  // Process request buffers directly through the provider; do not upload them
+  // to a public temporary file host.
   if (humanImageBuffer && garmentImageBuffer) {
     try {
       console.log('Attempting IDM-VTON generation...');
@@ -167,7 +117,7 @@ async function generateStyleImage(prompt, humanImageBuffer, garmentImageBuffer, 
     }
   }
 
-  // 3. Together AI (Commented out)
+  // Together AI (Commented out)
   /*
   // Together AI free tier confirmed unavailable as of Sep 2026, kept for reference only
   try {
@@ -181,7 +131,7 @@ async function generateStyleImage(prompt, humanImageBuffer, garmentImageBuffer, 
   }
   */
 
-  // 4. Fallback to Pollinations.ai
+  // Fallback to Pollinations.ai
   console.log('Falling back to Pollinations.ai for image generation');
   return `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=512&height=768&nologo=true`;
 }

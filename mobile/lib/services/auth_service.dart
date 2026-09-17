@@ -7,6 +7,14 @@ class AuthService {
   Stream<User?> get authStateChanges => _auth.authStateChanges();
   User? get currentUser => _auth.currentUser;
 
+  Future<String> idToken() async {
+    final token = await _auth.currentUser?.getIdToken();
+    if (token == null || token.isEmpty) {
+      throw StateError('No authenticated Firebase user is available.');
+    }
+    return token;
+  }
+
   Future<UserCredential> signIn(String email, String password) =>
       _auth.signInWithEmailAndPassword(email: email, password: password);
 
@@ -18,10 +26,26 @@ class AuthService {
 
   Future<void> signOut() => _auth.signOut();
 
-  Future<void> deleteAccount() async {
+  Future<void> deleteAccount({String? password}) async {
     final user = _auth.currentUser;
     if (user == null) return;
-    await user.delete();
+    try {
+      await user.delete();
+    } on FirebaseAuthException catch (error) {
+      if (error.code != 'requires-recent-login' ||
+          password == null ||
+          password.isEmpty ||
+          user.email == null ||
+          user.email!.isEmpty) {
+        rethrow;
+      }
+      final credential = EmailAuthProvider.credential(
+        email: user.email!,
+        password: password,
+      );
+      await user.reauthenticateWithCredential(credential);
+      await user.delete();
+    }
   }
 
   static String friendlyError(Object error) {

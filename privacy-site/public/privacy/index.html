@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Twinly Privacy Policy</title>
+  <style>
+    :root { color-scheme: light; --ink:#172033; --muted:#5e6879; --accent:#315fe8; --wash:#f5f7fc; }
+    * { box-sizing:border-box; } body { margin:0; background:var(--wash); color:var(--ink); font:16px/1.65 system-ui,-apple-system,Segoe UI,sans-serif; }
+    header { background:#111827; color:white; padding:28px 20px; } header nav, main { max-width:900px; margin:auto; }
+    header nav { display:flex; justify-content:space-between; gap:16px; align-items:center; } a { color:var(--accent); } header a { color:white; text-decoration:none; }
+    main { background:white; margin-top:28px; margin-bottom:28px; padding:clamp(24px,5vw,56px); border-radius:18px; box-shadow:0 8px 30px #17203312; }
+    h1 { margin:0 0 8px; font-size:clamp(2rem,5vw,3rem); } h2 { margin-top:36px; font-size:1.45rem; } h3 { margin-top:26px; }
+    .meta { color:var(--muted); margin:0 0 28px; } .notice { background:#eef3ff; border-left:4px solid var(--accent); padding:14px 18px; }
+    footer { max-width:900px; margin:0 auto; padding:0 20px 32px; color:var(--muted); } code { background:#f0f2f6; padding:2px 6px; border-radius:4px; }
+    @media (max-width:600px) { header nav { align-items:flex-start; flex-direction:column; } main { margin:16px 12px; border-radius:12px; } }
+  </style>
+</head>
+<body>
+  <header><nav><a href="/">Twinly</a><a href="/delete-account/">Delete account</a></nav></header>
+  <main>
+    <h1>Twinly Privacy Policy</h1>
+    <p class="meta"><strong>Effective date:</strong> September 16, 2026<br><strong>Developer:</strong> Team Sapphire<br><strong>Privacy contact:</strong> <a href="mailto:sushdevv05@gmail.com">sushdevv05@gmail.com</a></p>
+
+    <p>This Privacy Policy describes the current behavior of the Twinly Flutter application and its connected services.</p>
+
+    <h2>1. Information Twinly processes</h2>
+    <h3>Account and profile information</h3>
+    <p>Twinly uses Firebase Authentication for email/password sign-up, sign-in, password reset, sign-out, and Firebase account deletion. The app stores the entered name, email address, and gender preference locally on the device using <code>SharedPreferences</code>.</p>
+    <p>The app also stores fashion and avatar information locally, including height, shoulder width, bust/chest, waist, hip, inseam, body frame, skin tone, hair type, hair color, fit preference, style preference, and budget. The app's current profile implementation does not use a Firestore client or a Firebase Storage client.</p>
+    <p>When profile onboarding is completed, the app attempts to send the fashion profile to the Express API at <code>POST /api/profile</code>. The server writes that request body to a UID-scoped file under <code>server/data/profiles/</code>.</p>
+
+    <h3>Saved looks and usage data</h3>
+    <p>Saved fashion looks, including their generated image URL, garment information, fit-guide result, identifier, and creation time, are stored locally with <code>SharedPreferences</code>. Usage-limit counters and avatar profiles are also stored locally.</p>
+
+    <h3>Garment images and generated previews</h3>
+    <p>If you choose to upload a garment image, Twinly reads the image from the device and sends its bytes to the Express API for garment analysis. If you provide a product URL, Twinly sends that URL to the API instead.</p>
+    <p>When you generate a try-on preview, Twinly can send the garment image bytes, fashion profile, garment data, and optional garment URL to the Express API. The API processes the request using its configured provider integrations and returns an image URL. Twinly stores that returned URL in the local saved-look record when you save the look.</p>
+    <p>The repository does not establish how long an external image-generation provider retains uploaded inputs or generated outputs. Twinly does not control those retention terms.</p>
+
+    <h3>Purchases and subscriptions</h3>
+    <p>When RevenueCat is enabled on a supported native platform, Twinly configures the RevenueCat SDK, requests customer information and offerings, processes purchases, restores purchases, and listens for customer-information updates. The entitlement identifier is:</p>
+    <p><code>twinly_pro</code></p>
+    <p>Twinly does not pass fashion measurements or image bytes directly to RevenueCat. RevenueCat's own privacy policy and applicable app-store terms govern the purchase and subscription data it processes.</p>
+
+    <h3>Analytics and crash reporting</h3>
+    <p>There are no analytics or crash-reporting SDKs in this build.</p>
+
+    <h3>Merchant and affiliate links</h3>
+    <p>There are no merchant or affiliate links in this build.</p>
+
+    <h2>2. How Twinly uses this information</h2>
+    <ul><li>Authenticate users and manage Firebase accounts.</li><li>Build and update local avatar and fashion profiles.</li><li>Calculate fit-guide recommendations.</li><li>Analyze selected garment images or product URLs.</li><li>Request generated try-on previews.</li><li>Display and locally save generated looks.</li><li>Enforce local free-tier usage limits.</li><li>Determine premium access through RevenueCat when enabled.</li></ul>
+
+    <h2>3. Sharing and service providers</h2>
+    <p>Depending on the feature and configuration, information may be sent to Firebase Authentication, Twinly's Express API, the image-generation or garment-analysis providers configured by that API, and RevenueCat and the relevant app store for purchases and entitlement status.</p>
+
+    <h2>4. Local storage and retention</h2>
+    <p>Profile data, avatar data, usage counters, and saved-look records are stored in local app storage through <code>SharedPreferences</code>. They may remain on the device until the account-deletion workflow, app data removal, or uninstall.</p>
+    <p>The authenticated <code>DELETE /api/account</code> endpoint removes the user's UID-scoped server profile. The repository has no automatic retention schedule for server data.</p>
+
+    <h2>5. Deletion and account requests</h2>
+    <p>In-app deletion sends the current Firebase ID token to the authenticated server deletion endpoint, deletes the Firebase Auth user, and clears the local name, email, gender preference, fashion profile, saved looks, saved profiles, active profile ID, usage counters, and last garment. If Firebase requires recent authentication, the app requests the password and retries with email/password reauthentication. In Demo Mode, only local data is cleared.</p>
+    <p>Third-party image-provider data may not be immediately deletable because provider retention and deletion controls are outside Twinly's control. See the <a href="/delete-account/">account deletion instructions</a> for in-app and email requests.</p>
+
+    <h2>6. Security</h2><p>Twinly uses the security mechanisms provided by Firebase, RevenueCat, HTTPS-capable APIs, and configured hosting/provider environments. No method of transmission or storage can be guaranteed to be completely secure.</p>
+    <h2>7. Children's privacy</h2><p>Twinly is not intended for use by anyone under 16 years of age. We do not knowingly collect information from children under 16. If we learn that we have collected data from a child under 16, we will delete it.</p>
+    <h2>8. Changes to this policy</h2><p>Twinly may update this policy when the implementation, connected services, or legal requirements change. The updated policy will include a new effective date.</p>
+    <h2>9. Contact</h2><p>For privacy questions or deletion requests, contact <a href="mailto:sushdevv05@gmail.com">sushdevv05@gmail.com</a>.</p>
+  </main>
+  <footer>© 2026 Team Sapphire · <a href="/delete-account/">Account deletion</a></footer>
+</body>
+</html>

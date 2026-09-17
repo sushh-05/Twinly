@@ -1,3 +1,7 @@
+const String revenueCatAndroidApiKey = String.fromEnvironment(
+  'REVENUECAT_ANDROID_API_KEY',
+);
+
 class AppConfig {
   static const apiBaseUrl = String.fromEnvironment(
     'API_BASE_URL',
@@ -7,9 +11,7 @@ class AppConfig {
       String.fromEnvironment('DEMO_MODE', defaultValue: 'false') == 'true';
   static const useRevenueCat =
       String.fromEnvironment('USE_REVENUECAT', defaultValue: 'false') == 'true';
-  static const revenueCatAndroidKey = String.fromEnvironment(
-    'RC_ANDROID_API_KEY',
-  );
+  static const revenueCatAndroidKey = revenueCatAndroidApiKey;
   static const revenueCatEntitlement = 'twinly_pro';
   static const supportEmail = String.fromEnvironment(
     'SUPPORT_EMAIL',

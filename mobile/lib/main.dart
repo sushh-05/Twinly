@@ -23,7 +23,7 @@ import 'core/providers/saved_avatars_state.dart';
 import 'core/providers/garment_state.dart';
 
 // Supply these only for a build that should use real purchases:
-//   flutter run --dart-define=RC_ANDROID_API_KEY=goog_...
+//   flutter run --dart-define=REVENUECAT_ANDROID_API_KEY=goog_...
 // Use RevenueCat's *public* SDK key here, never its secret API key.
 const _revenueCatIosKey = String.fromEnvironment('REVENUECAT_IOS_KEY');
 
@@ -97,8 +97,12 @@ Future<void> _configureRevenueCat() async {
   }
 
   final apiKey = Platform.isAndroid
-      ? AppConfig.revenueCatAndroidKey
+      ? revenueCatAndroidApiKey
       : _revenueCatIosKey;
+
+  if (Platform.isAndroid && AppConfig.useRevenueCat && !AppConfig.demoMode) {
+    RevenueCatService.validateAndroidApiKey(apiKey);
+  }
 
   // A blank key is the normal local/demo configuration. The rest of the app
   // still runs, while purchases remain intentionally unavailable until the

@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:http/http.dart' as http;
+import 'package:firebase_auth/firebase_auth.dart';
 
 import '../config/app_config.dart';
 import '../models/fashion_garment.dart';
@@ -13,10 +14,15 @@ class FashionApiService {
 
   Future<void> saveProfile(FashionProfile profile) async {
     try {
+      final token = await FirebaseAuth.instance.currentUser?.getIdToken();
+      if (token == null || token.isEmpty) return;
       await http
           .post(
             _uri('/api/profile'),
-            headers: {'Content-Type': 'application/json'},
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer $token',
+            },
             body: jsonEncode(profile.toJson()),
           )
           .timeout(timeout);

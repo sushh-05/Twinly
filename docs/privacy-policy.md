@@ -1,81 +1,107 @@
 # Twinly Privacy Policy
 
-**Last updated:** September 5, 2026
+**Last updated:** September 16, 2026
+**Developer:** Team Sapphire
+**Privacy contact:** sushdevv05@gmail.com
 
-Twinly ("we," "our," or "the app") is a fashion decision assistant that helps users preview clothing on a personalized avatar, receive fit and styling guidance, and discover products to purchase from third-party merchants. This Privacy Policy explains what information we collect, how we use it, and the choices you have.
+This Privacy Policy describes the current behavior of the Twinly Flutter application and its connected services.
 
-## 1. Information We Collect
+## 1. Information Twinly processes
 
-### Information you provide directly
-- **Body measurements** (height, bust/chest, waist, hip, and similar fit-related inputs) that you enter manually to build your personalized avatar.
-- **Style preferences** such as fit preference (fitted/regular/loose), occasion, budget, skin tone, and hair type selections.
-- **Account information** such as your email address, if you create an account.
-- **Photos**, only if you choose to upload one for optional photo-based measurement estimation. Photo upload is never required — you can use Twinly entirely in mannequin mode without providing a photo.
+### Account and profile information
 
-### Information collected automatically
-- **Usage data**, such as which screens you visit, which garments you preview, and which features you use, to help us improve the app.
-- **Device information**, such as device type and operating system version, for compatibility and troubleshooting.
+Twinly uses Firebase Authentication for email/password sign-up, sign-in, password reset, sign-out, and Firebase account deletion. The app stores the entered name, email address, and gender preference locally on the device using `SharedPreferences`.
 
-## 2. How We Use Your Information
+The app also stores fashion and avatar information locally, including height, shoulder width, bust/chest, waist, hip, inseam, body frame, skin tone, hair type, hair color, fit preference, style preference, and budget. The app's current profile implementation does not use a Firestore client or a Firebase Storage client.
 
-We use the information we collect to:
-- Generate your personalized avatar and fit recommendations.
-- Provide styling suggestions (hairstyle, accessories, footwear) based on your preferences.
-- Show you products and estimated pricing from third-party merchants.
-- Let you save, compare, and share your looks.
-- Process premium subscription purchases through RevenueCat.
-- Improve app performance and fix bugs.
+When profile onboarding is completed, the app also attempts to send the fashion profile to the Express API at `POST /api/profile`. The server writes that request body to a UID-scoped file under `server/data/profiles/`.
 
-We do **not** sell your body measurements, photos, or appearance-related data to third parties, and we do not use this data for purposes unrelated to providing the app's features.
+### Saved looks and usage data
 
-## 3. Photo Handling
+Saved fashion looks, including their generated image URL, garment information, fit-guide result, identifier, and creation time, are stored locally with `SharedPreferences` under the app's saved-looks key. Usage-limit counters and avatar profiles are also stored locally.
 
-If you choose to upload a photo for measurement estimation:
-- The photo is processed to estimate body proportions.
-- You will always see the estimated measurements and can edit them before they are applied — nothing is applied silently.
-- We do not use your photo to identify you or perform facial recognition for any purpose other than assisting with fit estimation.
-- You can delete any uploaded photo at any time from within the app.
+The current saved-fashion-look screen supports viewing and sharing a generated image URL. The current implementation does not provide a saved-look deletion method.
 
-## 4. Data Sharing
+### Garment images and generated previews
 
-We share limited information with:
-- **RevenueCat**, to manage subscription status and premium entitlements. RevenueCat receives purchase and entitlement data but does not receive your body measurements or photos.
-- **Third-party merchants**, only when you tap a "Buy Now" or product link, at which point you leave Twinly and that merchant's own privacy policy applies.
-- **Service providers** who help us host the app and process data (such as our backend and database providers), under confidentiality obligations.
+If you choose to upload a garment image, Twinly reads the image from the device and sends its bytes to the Express API as a multipart request for garment analysis. If you provide a product URL, Twinly sends that URL to the API instead.
 
-We do not sell your personal data to advertisers or data brokers.
+When you generate a try-on preview, Twinly can send the garment image bytes, fashion profile, garment data, and optional garment URL to the Express API. The API processes the request using its configured provider integrations and returns an image URL. Twinly stores that returned URL in the local saved-look record when you save the look.
 
-## 5. Data Retention and Deletion
+The repository does not establish how long an external image-generation provider retains uploaded inputs or generated outputs. It also does not contain a server-side media deletion endpoint. Those retention and deletion terms must be confirmed with the configured providers before publication.
 
-- You can delete any saved look, uploaded photo, or your entire account at any time from within the app settings.
-- When you delete your account, we delete your profile data, measurements, and photos from our active systems within a reasonable period, except where retention is required by law.
-- To request deletion outside the app, contact us at the email below.
+### Purchases and subscriptions
 
-## 6. Your Choices
+When RevenueCat is enabled on a supported native platform, Twinly configures the RevenueCat SDK, requests customer information and offerings, processes purchases, restores purchases, and listens for customer-information updates. The app checks the RevenueCat entitlement identifier:
 
-- You can use Twinly entirely without uploading a photo (mannequin mode).
-- You can edit or delete your measurements and preferences at any time.
-- You can revoke a shared look's link at any time, which prevents further access by recipients.
-- You can request a copy or deletion of your data by contacting us.
+```text
+twinly_pro
+```
 
-## 7. Children's Privacy
+The current app code does not pass fashion measurements or image bytes directly to RevenueCat. RevenueCat's own privacy policy and applicable store terms govern the purchase and subscription data it processes.
 
-Twinly is not directed at children under 13, and we do not knowingly collect personal information from children under 13.
+### Analytics and crash reporting
 
-## 8. Security
+No analytics SDK, crash-reporting SDK, analytics event calls, or crash-reporting calls were found in the current `mobile/pubspec.yaml` or `mobile/lib/` implementation. This policy therefore does not state that Twinly currently collects analytics or crash reports.
 
-We use reasonable technical and organizational measures to protect your information, including encryption in transit. No method of transmission or storage is 100% secure, and we cannot guarantee absolute security.
+### Merchant and affiliate links
 
-## 9. Changes to This Policy
+No merchant checkout links, affiliate links, affiliate identifiers, or merchant-link tracking implementation were found in the current repository. The catalog currently contains product and image data, but the implementation does not establish an affiliate relationship or send users to a merchant checkout.
 
-We may update this Privacy Policy from time to time. We will update the "Last updated" date above when we do. Continued use of Twinly after changes constitutes acceptance of the revised policy.
+## 2. How Twinly uses this information
 
-## 10. Contact Us
+The current implementation uses this information to:
 
-If you have questions about this Privacy Policy or want to request data deletion, contact us at:
+- authenticate users and manage their Firebase account;
+- build and update a local avatar and fashion profile;
+- calculate fit-guide recommendations;
+- analyze selected garment images or product URLs;
+- request generated try-on previews from the Express API;
+- display and locally save generated looks;
+- enforce local free-tier usage limits; and
+- determine premium access through RevenueCat when RevenueCat is enabled.
 
-**Email:** [insert team contact email]
+The repository does not provide a basis for claiming that Twinly sells personal information, uses information for advertising, performs facial recognition, or uses analytics. Those statements should not be added unless the implementation changes and the policy is updated.
 
----
+## 3. Sharing and service providers
 
-*This policy is provided for the Twinly app submitted to RevenueCat Shipaton 2026. It should be reviewed periodically as the app's features evolve.*
+Depending on the feature and configuration used, information may be sent to:
+
+- **Firebase Authentication**, for account operations;
+- **Twinly's Express API**, for profile saving, garment analysis, and try-on generation;
+- **The image-generation or garment-analysis providers configured by the Express API**, when those server features are enabled; and
+- **RevenueCat and the relevant app store**, for purchases, subscriptions, and entitlement status.
+
+The current repository does not identify a single fixed image provider in this policy because the Express API selects providers from its server configuration. The deployed server configuration and each provider's privacy terms must be reviewed before publication.
+
+## 4. Local storage and retention
+
+The app stores profile data, avatar data, usage counters, and saved-look records in local app storage through `SharedPreferences`. The current code has no documented automatic retention schedule. These records may remain on the device until the app's account-deletion workflow, app data removal, or uninstall.
+
+The Express API writes the submitted profile to a UID-scoped file under `server/data/profiles/`. The authenticated `DELETE /api/account` endpoint removes that profile file. The repository contains no automatic retention job. Retention of uploaded inputs and generated image URLs outside the device is not defined by the current code.
+
+## 5. Deletion and account requests
+
+The in-app account deletion action in `mobile/lib/features/account/screen.dart` uses `AccountDeletionService` to coordinate deletion. With Demo Mode disabled, it sends the current Firebase ID token to the authenticated `DELETE /api/account` endpoint, deletes the Firebase Auth user, and clears these local `SharedPreferences` keys: `user_name`, `user_email`, `user_is_feminine`, `twinly.fashion_profile`, `twinly.fashion_saved_looks`, `twinly_saved_profiles_json`, `twinly_active_profile_id`, `usage_tries`, `usage_saves`, and `usage_last_garment`. If Firebase requires recent authentication, the app requests the password and retries with email/password reauthentication. The server deletion is UID-scoped and idempotent; a failed server deletion keeps the Firebase account so the request can be retried. In Demo Mode, only local data is cleared.
+
+The deletion tests cover successful deletion, Firebase failure, recent-login reauthentication, server failure, repeated deletion, local cleanup, and Demo Mode. These tests do not prove deletion of data retained by external image providers. The current server no longer uploads request images to Catbox or another public temporary host, but configured providers may return generated image URLs and their retention terms are not controlled by Twinly. Accordingly, Twinly must not claim complete deletion of third-party media until each production provider's retention/deletion behavior is verified or the architecture is changed to avoid persistent third-party media.
+
+Requests for deletion can also be sent to sushdevv05@gmail.com. Third-party image-provider retention and the deployment's backup policy may affect how quickly all copies can be removed.
+
+## 6. Security
+
+The app uses the security mechanisms provided by Firebase, RevenueCat, HTTPS-capable APIs, and the configured hosting/provider environments. The repository does not provide a complete security or retention audit, and no method of transmission or storage can be guaranteed to be completely secure.
+
+## 7. Children's privacy
+
+Twinly is not intended for use by anyone under 16 years of age. We do not knowingly collect information from children under 16. If we learn that we have collected data from a child under 16, we will delete it.
+
+## 8. Changes to this policy
+
+Twinly may update this policy when the implementation, connected services, or legal requirements change. The updated policy will include a new effective date.
+
+## 9. Contact
+
+For privacy questions or deletion requests, contact:
+
+**sushdevv05@gmail.com**

@@ -12,6 +12,16 @@ class RevenueCatService extends ChangeNotifier {
   bool loading = false;
   String? errorMessage;
 
+  static void validateAndroidApiKey(String apiKey) {
+    if (!kReleaseMode) return;
+    if (apiKey.isEmpty || apiKey.startsWith('test_')) {
+      throw StateError(
+        'RevenueCat Android API key is missing or invalid for a release build. '
+        'Provide REVENUECAT_ANDROID_API_KEY with a production public SDK key.',
+      );
+    }
+  }
+
   bool get isAvailable => enabled;
   bool get isPremium =>
       customerInfo?.entitlements.active.containsKey(entitlementId) ?? false;
